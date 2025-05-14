@@ -21,6 +21,16 @@ GameEngine::GameEngine()
 GameEngine::~GameEngine()
 {
 	delete player;
+} 
+
+void GameEngine::updateCollisions()
+{
+	if (player->getPosition().y + player->getGlobalBounds().size.y / 5.0f > window.getSize().y)
+	{
+		player->resetVelocityY();
+		player->setPosition(player->getPosition().x, window.getSize().y - player->getGlobalBounds().size.y / 5.0f);
+		
+	}
 }
 
 void GameEngine::updatePlayer()
@@ -31,6 +41,9 @@ void GameEngine::updatePlayer()
 void GameEngine::renderPlayer()
 {
 	player->render(window);
+
+	
+
 }
 
 void GameEngine::update()
@@ -48,6 +61,7 @@ void GameEngine::update()
 		
 	}
 	updatePlayer();
+	updateCollisions();
 }
 
 void GameEngine::render()

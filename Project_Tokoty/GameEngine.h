@@ -14,6 +14,7 @@ public:
 	virtual ~GameEngine();
 
 	//functions
+	void updateCollisions();
 	void updatePlayer();
 	void renderPlayer();
 	void update();
