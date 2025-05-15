@@ -20,7 +20,9 @@ void Player::initSprite()
 	sprite.emplace(texture);
 	currentFrame = sf::IntRect({ 0, 0 }, { 100, 100 }); //{top left corner} {wide tall}
 	sprite->setTextureRect(currentFrame);
+	std::cout << sprite->getGlobalBounds().size.x<< sprite->getGlobalBounds().size.x<<std::endl;
 	sprite->setScale({ 5.0f, 5.0f });
+	std::cout << sprite->getGlobalBounds().size.x << sprite->getGlobalBounds().size.x << std::endl;
 }
 
 void Player::initAnmation()
@@ -31,12 +33,12 @@ void Player::initAnmation()
 void Player::initPhysics()
 {
 	velocity = sf::Vector2f(0.0f, 0.0f);
-	maxVelocity = 10.0f;
-	minVelocity = 3.0f;
-	acceleration = 2.0f;
-	friction = 0.75f;
-	gravity = 4.0f;
-	maxGravity = 10.0f;
+	maxVelocity = 20.0f;
+	minVelocity = 1.0f;
+	acceleration = 3.0f;
+	friction = 0.80f;
+	gravity = 3.0f;
+	maxGravity = 30.0f;
 }
 
 
@@ -83,6 +85,7 @@ void Player::move(const float x, const float y)
 
 	if (std::abs(velocity.x) > maxVelocity) velocity.x = maxVelocity * ((velocity.x < 0) ? -1.0f : 1.0f);
 	//if (std::abs(velocity.y) > maxVelocity) velocity.y = maxVelocity * ((velocity.y < 0) ? -1.0f : 1.0f);
+	
 }
 
 void Player::updatePhysics()
@@ -97,7 +100,8 @@ void Player::updatePhysics()
 	if(std::abs(velocity.y) < minVelocity) velocity.y = 0.0f;
 
 	sprite->move(velocity);
-
+	std::cout << "velocity.x: " << velocity.x << "        ";
+	std::cout << "velocity.y: " << velocity.y << std::endl;
 }
 
 void Player::updateMovement()
@@ -106,25 +110,21 @@ void Player::updateMovement()
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) //JUMP
 	{
-		std::cout << "W WWWWWW\n";
 		move(0.0f, -2.0f);
 		animationState = Player_AnimationStates::JUMP;
 	}
 	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) //LEFT
 	{
-		std::cout << "W WWWWWW\n";
 		move(-2.0f, 0.0f );
 		animationState = Player_AnimationStates::LEFT;
 	}
 	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)) //DOWN
 	{
-		std::cout << "W WWWWWW\n";
 		move(0.0f, 2.0f);
 		animationState = Player_AnimationStates::FALL;
 	}
 	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) //RIGHT
 	{
-		std::cout << "W WWWWWW\n";
 		move(2.0f, 0.0f);
 		animationState = Player_AnimationStates::RIGHT;
 	}
@@ -154,14 +154,18 @@ void Player::updateAnimation()
 				{
 				case Player_AnimationStates::LEFT:
 					currentFrame.position.x += 100;
-					currentFrame.position.y = 100;
+					currentFrame.position.y = 200;
 					if (currentFrame.position.x > 100 * 5) currentFrame.position.x = 0;
+					sprite->setScale({ -5.0f, 5.0f });
+					sprite->setOrigin(sf::Vector2f(sprite->getGlobalBounds().size.x / 5.0f, 0 ));
 					break;
 
 				case Player_AnimationStates::RIGHT:
 					currentFrame.position.x += 100;
 					currentFrame.position.y = 200;
 					if (currentFrame.position.x > 100 * 5) currentFrame.position.x = 0;
+					sprite->setScale({ 5.0f, 5.0f });
+					sprite->setOrigin({ 0, 0 });
 					break;
 
 				case Player_AnimationStates::JUMP:
@@ -200,11 +204,10 @@ void Player::render(sf::RenderTarget& target)
 	{
 		target.draw(*sprite);
 	}
-	sf::CircleShape circle;
-	circle.setRadius(50.0f);
-	circle.setFillColor(sf::Color::Red);
+	sf::RectangleShape circle(sf::Vector2f(sprite->getGlobalBounds().size.x, sprite->getGlobalBounds().size.y));
+	//circle.setRadius(50.0f);
+	circle.setFillColor(sf::Color(255, 0, 0, 128)); // Red, half transparent
 	circle.setPosition(sprite->getPosition());
 	target.draw(circle);
-	circle.setPosition(sprite->getPosition() + sf::Vector2f(sprite->getGlobalBounds().size.x, sprite->getGlobalBounds().size.y));
-	target.draw(circle);
+	
 }

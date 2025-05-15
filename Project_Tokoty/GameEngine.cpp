@@ -1,10 +1,19 @@
 #include "stdafx.h"
 #include "GameEngine.h"
 
+void GameEngine::initView()
+{
+	sf::Vector2f plyayerCenter = player->getPosition();
+	plyayerCenter.x += player->getGlobalBounds().size.x / 2;
+	plyayerCenter.y += player->getGlobalBounds().size.y / 2;
+	view.setCenter(plyayerCenter);
+	window.setView(view);
+}
+
 void GameEngine::initWindow()
 {
 	window.create(sf::VideoMode({800,600}), "Project Tokoty", sf::Style::Close | sf::Style::Titlebar); //VideoMode::getDesktopMode()
-	window.setFramerateLimit(144); // customize option to be added
+	window.setFramerateLimit(60); // customize option to be added
 }
 
 void GameEngine::initPlayer()
@@ -16,6 +25,7 @@ GameEngine::GameEngine()
 {
 	initWindow();
 	initPlayer();
+	initView();
 }
 
 GameEngine::~GameEngine()
@@ -23,12 +33,21 @@ GameEngine::~GameEngine()
 	delete player;
 } 
 
+void GameEngine::updateView()
+{
+	sf::Vector2f plyayerCenter = player->getPosition();
+	plyayerCenter.x += player->getGlobalBounds().size.x / 2;
+	plyayerCenter.y += player->getGlobalBounds().size.y / 2;
+	view.setCenter(plyayerCenter);
+	window.setView(view);
+}
+
 void GameEngine::updateCollisions()
 {
-	if (player->getPosition().y + player->getGlobalBounds().size.y / 5.0f > window.getSize().y)
+	if (player->getPosition().y + player->getGlobalBounds().size.y  > window.getSize().y)
 	{
 		player->resetVelocityY();
-		player->setPosition(player->getPosition().x, window.getSize().y - player->getGlobalBounds().size.y / 5.0f);
+		player->setPosition(player->getPosition().x, window.getSize().y - player->getGlobalBounds().size.y );
 		
 	}
 }
@@ -62,6 +81,7 @@ void GameEngine::update()
 	}
 	updatePlayer();
 	updateCollisions();
+	updateView();
 }
 
 void GameEngine::render()
