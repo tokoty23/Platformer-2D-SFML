@@ -1,4 +1,5 @@
 #pragma once
+#include "Collider.h"
 
 enum Player_AnimationStates
 {
@@ -15,6 +16,11 @@ private:
 	//Sprite
 	sf::Texture texture;
 	std::optional<sf::Sprite> sprite;
+
+	//Hitbox
+	std::unique_ptr<Collider> hitboxPlayer;
+	//Collider
+	//Collider* hitboxPlayer = nullptr;
 	
 	//Animation
 	sf::IntRect currentFrame;
@@ -30,6 +36,8 @@ private:
 	float gravity;
 	float maxGravity;
 
+	
+
 	//Initialization functions
 	void initVariables();
 	void initTexture();
@@ -40,6 +48,11 @@ private:
 public:
 	Player();
 	virtual ~Player();
+
+	Collider* getCollider() const
+	{
+		return hitboxPlayer.get();
+	}
 
 	//Accessors
 	const sf::Vector2f getPosition() const;

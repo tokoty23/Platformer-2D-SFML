@@ -1,8 +1,10 @@
 #include "stdafx.h"
 #include "Collider.h"
 
-Collider::Collider(sf::Vector2f position, sf::Vector2f size, float push)
+Collider::Collider(sf::FloatRect hitbox, float push) :
+	hitbox(hitbox)
 {
+
 }
 
 Collider::~Collider()
@@ -19,6 +21,26 @@ sf::Vector2f Collider::getSize() const
 	return hitbox.size;
 }
 
+void Collider::move(float x, float y)
+{
+	hitbox.position.x += x;
+	hitbox.position.y += y;
+}
+
+void Collider::renderCollider(sf::RenderTarget& target, Collider& other)
+{
+	sf::Vector2f otherPosisiton = other.getPosition();
+	sf::Vector2f otherHalfSize = other.getSize() / 2.0f;
+	sf::Vector2f pos;
+	pos.x = otherPosisiton.x + otherHalfSize.x;
+	pos.y = otherPosisiton.y + otherHalfSize.y;
+	sf::CircleShape circle;
+	circle.setPosition(pos);
+	circle.setFillColor(sf::Color(255, 255, 255, 128)); // Red, half transparent
+	circle.setRadius(50.0f);
+	target.draw(circle);
+}
+
 bool Collider::checkCollision(Collider& other, float push)
 {
 	sf::Vector2f otherPosisiton = other.getPosition();
@@ -31,36 +53,38 @@ bool Collider::checkCollision(Collider& other, float push)
 	float intersectX = std::abs(deltaX) - (otherHalfSize.x + thisHalfSize.x);
 	float intersectY = std::abs(deltaY) - (otherHalfSize.y + thisHalfSize.y);
 
-	if (intersectX < 0.0f && intersectY < 0.0f)
+	if (intersectX < 0 && intersectY < 0)
 	{
+		push = std::clamp(push, 0.0f, 1.0f);
+
 		if (intersectX > intersectY)
 		{
-			if (deltaX > 0.0f)
+			if (deltaX > 0)
 			{
-				hitbox.position.x -= intersectX * push;
-				other.hitbox.position.x += intersectX * (1.0f - push);
+				move(intersectX * (1.0f - push), 0.0f);
+				other.move(-intersectX * push, 0.0f);
 			}
 			else
 			{
-				hitbox.position.x += intersectX * push;
-				other.hitbox.position.x -= intersectX * (1.0f - push);
+				move(-intersectX * (1.0f - push), 0.0f);
+				other.move(intersectX * push, 0.0f);
 			}
 		}
 		else
 		{
-			if (deltaY > 0.0f)
+			if (deltaY > 0)
 			{
-				hitbox.position.y -= intersectY * push;
-				other.hitbox.position.y += intersectY * (1.0f - push);
+				move(0.0f, intersectY * (1.0f - push));
+				other.move(0.0f, -intersectY * push);
 			}
 			else
 			{
-				hitbox.position.y += intersectY * push;
-				other.hitbox.position.y -= intersectY * (1.0f - push);
+				move(0.0f, -intersectY * (1.0f - push));
+				other.move(0.0f, intersectY * push);
 			}
 		}
-
 		return true;
 	}
+
 	return false;
 }

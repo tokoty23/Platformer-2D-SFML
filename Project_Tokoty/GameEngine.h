@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Player.h"
+#include "Tile.h"
 
 class GameEngine
 {
@@ -7,11 +8,13 @@ private:
 	sf::RenderWindow window;
 	//sf::Event event;
 	Player* player;
+	Tile* tile1;
 	sf::View view;
 
 	void initView();
 	void initWindow();
 	void initPlayer();
+	void initTile();
 public:
 	GameEngine();
 	virtual ~GameEngine();

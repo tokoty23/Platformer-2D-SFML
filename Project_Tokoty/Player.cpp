@@ -20,9 +20,10 @@ void Player::initSprite()
 	sprite.emplace(texture);
 	currentFrame = sf::IntRect({ 0, 0 }, { 100, 100 }); //{top left corner} {wide tall}
 	sprite->setTextureRect(currentFrame);
-	std::cout << sprite->getGlobalBounds().size.x<< sprite->getGlobalBounds().size.x<<std::endl;
+	//std::cout << sprite->getGlobalBounds().size.x<< sprite->getGlobalBounds().size.x<<std::endl;
 	sprite->setScale({ 5.0f, 5.0f });
-	std::cout << sprite->getGlobalBounds().size.x << sprite->getGlobalBounds().size.x << std::endl;
+	//std::cout << sprite->getGlobalBounds().size.x << sprite->getGlobalBounds().size.x << std::endl;
+	hitboxPlayer = std::make_unique<Collider>(sprite->getGlobalBounds(), 0.0f); // collider size is the same as sprite size
 }
 
 void Player::initAnmation()
@@ -100,8 +101,9 @@ void Player::updatePhysics()
 	if(std::abs(velocity.y) < minVelocity) velocity.y = 0.0f;
 
 	sprite->move(velocity);
-	std::cout << "velocity.x: " << velocity.x << "        ";
-	std::cout << "velocity.y: " << velocity.y << std::endl;
+	//std::cout << "velocity.x: " << velocity.x << "        ";
+	//std::cout << "velocity.y: " << velocity.y << std::endl;
+
 }
 
 void Player::updateMovement()
@@ -209,5 +211,6 @@ void Player::render(sf::RenderTarget& target)
 	circle.setFillColor(sf::Color(255, 0, 0, 128)); // Red, half transparent
 	circle.setPosition(sprite->getPosition());
 	target.draw(circle);
+	hitboxPlayer->renderCollider(target, *hitboxPlayer);
 	
 }
