@@ -21,7 +21,7 @@ void Player::initSprite()
 	currentFrame = sf::IntRect({ 0, 0 }, { 100, 100 }); //{top left corner} {wide tall}
 	sprite->setTextureRect(currentFrame);
 	//std::cout << sprite->getGlobalBounds().size.x<< sprite->getGlobalBounds().size.x<<std::endl;
-	sprite->setScale({ 5.0f, 5.0f });
+	//sprite->setScale({ 5.0f, 5.0f });
 	//std::cout << sprite->getGlobalBounds().size.x << sprite->getGlobalBounds().size.x << std::endl;
 	hitboxPlayer = std::make_unique<Collider>(sprite->getGlobalBounds(), 0.0f); // collider size is the same as sprite size
 }
@@ -61,17 +61,17 @@ Player::~Player()
 
 const sf::Vector2f Player::getPosition() const
 {
-	return sprite->getPosition();
+	return hitboxPlayer->getPosition();
 }
 
 const sf::FloatRect Player::getGlobalBounds() const
 {
-	return sprite->getGlobalBounds();
+	return hitboxPlayer->getGlobalBounds();
 }
 
 void Player::setPosition(const float x, const float y)
 {
-	sprite->setPosition({ x, y });
+	hitboxPlayer->setPosition(x, y);
 }
 
 void Player::resetVelocityY()
@@ -97,10 +97,12 @@ void Player::updatePhysics()
 
 	velocity *= friction;
 
-	if(std::abs(velocity.x) < minVelocity) velocity.x = 0.0f;
-	if(std::abs(velocity.y) < minVelocity) velocity.y = 0.0f;
+	if (std::abs(velocity.x) < minVelocity) velocity.x = 0.0f;
+	if (std::abs(velocity.y) < minVelocity) velocity.y = 0.0f;
 
-	sprite->move(velocity);
+	hitboxPlayer->move(velocity);
+
+	
 	//std::cout << "velocity.x: " << velocity.x << "        ";
 	//std::cout << "velocity.y: " << velocity.y << std::endl;
 
@@ -158,16 +160,18 @@ void Player::updateAnimation()
 					currentFrame.position.x += 100;
 					currentFrame.position.y = 200;
 					if (currentFrame.position.x > 100 * 5) currentFrame.position.x = 0;
-					sprite->setScale({ -5.0f, 5.0f });
-					sprite->setOrigin(sf::Vector2f(sprite->getGlobalBounds().size.x / 5.0f, 0 ));
+					if (currentFrame.size.x > 0) currentFrame.size.x *= -1;
+
+
 					break;
 
 				case Player_AnimationStates::RIGHT:
 					currentFrame.position.x += 100;
 					currentFrame.position.y = 200;
 					if (currentFrame.position.x > 100 * 5) currentFrame.position.x = 0;
-					sprite->setScale({ 5.0f, 5.0f });
-					sprite->setOrigin({ 0, 0 });
+					if (currentFrame.size.x < 0) currentFrame.size.x *= -1;
+					//sprite->setScale({ 5.0f, 5.0f });
+					//sprite->setOrigin({ 0, 0 });
 					break;
 
 				case Player_AnimationStates::JUMP:
@@ -204,13 +208,29 @@ void Player::render(sf::RenderTarget& target)
 {
 	if (sprite)
 	{
+		sprite->setPosition(hitboxPlayer->getPosition());
+		/*
+		std::cout << "Sprite pos: " << sprite->getGlobalBounds().size.x << ", " << sprite->getGlobalBounds().size.y << std::endl;
+		std::cout << "Collider pos: " << hitboxPlayer->getGlobalBounds().position.x << ", " << hitboxPlayer->getGlobalBounds().position.y << std::endl;
+		std::cout << "Collider pos: " << hitboxPlayer->getPosition().x << ", " << hitboxPlayer->getPosition().y << std::endl;
+		std::cout << "Collider size: " << hitboxPlayer->getGlobalBounds().size.x << ", " << hitboxPlayer->getGlobalBounds().size.y << std::endl;
+		std::cout << "Collider size: " << hitboxPlayer->getSize().x << ", " << hitboxPlayer->getSize().y << std::endl;
+
+		*/
+		//std::cout << "Sprite x: " << sprite->getPosition().x << " Sprite y: " << sprite->getPosition().y << std::endl;
 		target.draw(*sprite);
 	}
+	hitboxPlayer->renderCollider(target);
+	sf::RectangleShape testRect(sf::Vector2f(sprite->getGlobalBounds().size.x, sprite->getGlobalBounds().size.y));
+	testRect.setPosition(sf::Vector2f(sprite->getGlobalBounds().position.x, sprite->getGlobalBounds().position.y) );
+	testRect.setFillColor(sf::Color(255, 0, 0, 128));
+	target.draw(testRect);
+
 	sf::RectangleShape circle(sf::Vector2f(sprite->getGlobalBounds().size.x, sprite->getGlobalBounds().size.y));
 	//circle.setRadius(50.0f);
 	circle.setFillColor(sf::Color(255, 0, 0, 128)); // Red, half transparent
 	circle.setPosition(sprite->getPosition());
-	target.draw(circle);
-	hitboxPlayer->renderCollider(target, *hitboxPlayer);
+	//target.draw(circle);
+	
 	
 }

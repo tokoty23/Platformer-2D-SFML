@@ -20,8 +20,9 @@ void Tile::initSprite()
 {
 	sprite.emplace(texture);
 	
-	sprite->setTextureRect(sf::IntRect({ 0, 0 }, { 100, 100 })); //{top left corner} {wide tall}
+	sprite->setTextureRect(sf::IntRect({ 0, 0 }, { 200, 200 })); //{top left corner} {wide tall}
 	sprite->setPosition({ 50.0f, 50.0f });
+	//sprite->setScale({ 5.0f, 5.0f });
 	hitboxTile = std::make_unique<Collider>(sprite->getGlobalBounds(), 0.0f);
 }
 
@@ -32,18 +33,17 @@ const sf::FloatRect Tile::getGlobalBounds() const
 
 void Tile::update()
 {// Update the hitbox position to match the sprite position
-	hitboxTile = std::make_unique<Collider>(sprite->getGlobalBounds(), 0.0f); // collider size is the same as sprite size
-	hitboxTile->move(sprite->getPosition().x, sprite->getPosition().y);
+	//hitboxTile = std::make_unique<Collider>(sprite->getGlobalBounds(), 0.0f); // collider size is the same as sprite size
+	//hitboxTile->move(sprite->getPosition().x, sprite->getPosition().y);
 
 }
 
 void Tile::render(sf::RenderTarget& target)
 {
-	//sf::RectangleShape hitboxShape(sf::Vector2f(hitboxTile->getSize() ));
-	if (hitboxTile) {
-		sprite->setPosition(hitboxTile->getPosition());//to be done sync la sprite si hitbox care se randeaza primu?
+	if (sprite)
+	{
+		sprite->setPosition(hitboxTile->getPosition());
+		target.draw(*sprite);
 	}
-	
-
-	target.draw(*sprite);
+	hitboxTile->renderCollider(target);
 }

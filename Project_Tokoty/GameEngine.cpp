@@ -31,7 +31,7 @@ GameEngine::GameEngine()
 {
 	initWindow();
 	initPlayer();
-	//initView();
+	initView();
 	initTile();
 }
 
@@ -84,13 +84,16 @@ void GameEngine::update()
 		
 	}
 	updatePlayer();
-	updateCollisions();
-	std::cout << tile1->getCollider()->getPosition().x;
+	//updateCollisions();
 	if (tile1->getCollider() && player->getCollider()) {
-		
-		tile1->getCollider()->checkCollision(*player->getCollider(), 0.0f);
+
+
+
+		player->getCollider()->checkCollision(*tile1->getCollider(), 1.0f, window);
+
 	}
-	//updateView();
+	
+	updateView();
 }
 
 void GameEngine::render()
@@ -99,7 +102,7 @@ void GameEngine::render()
 
 	renderPlayer();
 	tile1->render(window);
-
+	//tile1->getCollider()->renderCollider(window);
 
 	window.display();
 }
