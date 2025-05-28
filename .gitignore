@@ -1,0 +1,24 @@
+## Foldere de build Visual Studio
+x64/
+x86/
+Debug/
+Release/
+bin/
+obj/
+
+## Fișiere precompilate
+*.pch
+*.pdb
+*.ilk
+
+## Setări Visual Studio
+.vs/
+*.user
+*.suo
+
+# SFML binaries
+*.dll
+*.so
+*.dylib
+sfml/lib/
+sfml/bin/
