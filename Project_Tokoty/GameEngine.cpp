@@ -18,15 +18,20 @@ void GameEngine::initWindow()
 
 void GameEngine::initPlayer()
 {
-	player = new Player();
+	player = new Player("Soldier.png", sf::IntRect({ 0, 0 }, { 100, 100 }), { 0, 50 } );
+	player->setScale({ 2.0f, 2.0f });
 }
 
 void GameEngine::initTile()
 {
-	tile1 = new Tile("Soldier.png", sf::IntRect({ 0, 0 }, { 200, 200 }), { 0, 50 });
-	tile2 = new Tile("Soldier.png", sf::IntRect({ 0, 0 }, { 200, 200 }), { 200, 50 });
-	tile3 = new Tile("Soldier.png", sf::IntRect({ 0, 0 }, { 200, 200 }), { 200, -150 });
-	tile4 = new Tile("Soldier.png", sf::IntRect({ 0, 0 }, { 200, 200 }), { 400, 50 });
+	// tiles are ca parametri 1.imaginea 2.intrect pentru marimea hitbox, 3.pentru marimea sprite si 4.pozitia sprite/hitbox
+	tile1 = new Tile("IDLE.png", sf::IntRect({ 0, 0 }, { 64, 64 }), sf::IntRect({ 15, 30 }, { 64, 54 }), { 0, 50 } );
+
+	tile1->setScale({ 2.0f, 2.0f });
+	tile2 = new Tile("Soldier.png", sf::IntRect({ 0, 0 }, { 200, 200 }), sf::IntRect({ 20, 20 }, { 64, 64 }), { 200, 50 } );
+	tile3 = new Tile("Soldier.png", sf::IntRect({ 0, 0 }, { 200, 200 }), sf::IntRect({ 20, 20 }, { 64, 64 }), { 200, -150 } );
+	tile3->setScale({ 2.5f, 2.5f });
+	tile4 = new Tile("Soldier.png", sf::IntRect({ 0, 0 }, { 200, 200 }), sf::IntRect({ 20, 20 }, { 64, 64 }), { 400, 50 } );
 	
 }
 

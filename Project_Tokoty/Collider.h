@@ -21,6 +21,11 @@ public:
 		hitbox.size.y = height;
 	}
 
+	void setScale(sf::Vector2f scale) {
+		hitbox.size.x *= scale.x;
+		hitbox.size.y *= scale.y;
+	}
+
 	//Functions
 	void move(float x, float y);
 	void move(sf::Vector2f velocity);
