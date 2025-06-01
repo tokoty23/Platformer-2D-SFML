@@ -5,21 +5,27 @@
 void Player::initVariables()
 {
 	animationState = Player_AnimationStates::IDLE;
+	userInput = std::make_unique<UserInput>();
 }
 
 void Player::initTexture()
 {
-	if (!texture.loadFromFile("Textures/Soldier.png"))
+	if (!texture.loadFromFile("Textures/spritesheet.png"))
 	{
 		std::cout << "ERROR Class Player: initTexture()";
 	}
+	
+
 }
 
 void Player::initSprite()
 {
+	
+
 	sprite.emplace(texture);
 	currentFrame = sf::IntRect({ 0, 0 }, { 100, 100 }); //{top left corner} {wide tall}
 	sprite->setTextureRect(currentFrame);
+	sprite->setScale({ 5.0f, 5.0f });
 	//std::cout << sprite->getGlobalBounds().size.x<< sprite->getGlobalBounds().size.x<<std::endl;
 	//sprite->setScale({ 5.0f, 5.0f });
 	//std::cout << sprite->getGlobalBounds().size.x << sprite->getGlobalBounds().size.x << std::endl;
@@ -44,8 +50,18 @@ void Player::initPhysics()
 
 
 
-Player::Player()
+Player::Player(std::string textureName, sf::IntRect currentRect, sf::Vector2f position)
 {
+
+	animatedSprite = std::make_unique<AnimatedSprite>(textureName, currentRect, position);
+	//std::string textureName, sf::IntRect currentRect, sf::Vector2f position
+	animatedSprite->addAnimation("IDLE", 4, sf::IntRect({ 0, 0 }, { 100, 100 }), 0.2f);
+	animatedSprite->addAnimation("MOVE_LEFT", 4, sf::IntRect({ 0, 100 }, { 100, 100 }), 0.2f);
+	animatedSprite->addAnimation("MOVE_RIGHT", 4, sf::IntRect({ 0, 200 }, { 100, 100 }), 0.2f);
+	animatedSprite->addAnimation("MOVE_UP", 4, sf::IntRect({ 0, 300 }, { 100, 100 }), 0.2f);
+	animatedSprite->addAnimation("MOVE_DOWN", 4, sf::IntRect({ 0, 400 }, { 100, 100 }), 0.2f);
+	//std::string name, int frameCount, sf::IntRect frameSize, float frameTime, bool looping
+		
 	initTexture();
 	initSprite();	
 	initAnmation();
@@ -111,26 +127,39 @@ void Player::updatePhysics()
 void Player::updateMovement()
 {
 	animationState = Player_AnimationStates::IDLE;
+	userInputData = userInput->getUserInput();
 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) //JUMP
+	for(const auto& input : userInputData)
 	{
-		move(0.0f, -2.0f);
-		animationState = Player_AnimationStates::JUMP;
-	}
-	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) //LEFT
-	{
-		move(-2.0f, 0.0f );
-		animationState = Player_AnimationStates::LEFT;
-	}
-	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)) //DOWN
-	{
-		move(0.0f, 2.0f);
-		animationState = Player_AnimationStates::FALL;
-	}
-	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) //RIGHT
-	{
-		move(2.0f, 0.0f);
-		animationState = Player_AnimationStates::RIGHT;
+		switch (input)
+		{
+			case UserInputData::U_MOVE_LEFT:
+				move(-2.0f, 0.0f);
+				animatedSprite->playAnimation("MOVE_LEFT", 0.05f);
+				animationState = Player_AnimationStates::LEFT;
+				break;
+
+			case UserInputData::U_MOVE_RIGHT:
+				move(2.0f, 0.0f);
+				animatedSprite->playAnimation("MOVE_RIGHT", 0.05f);
+				animationState = Player_AnimationStates::RIGHT;
+				break;
+
+			case UserInputData::U_MOVE_UP:
+				move(0.0f, -2.0f);
+				animatedSprite->playAnimation("MOVE_UP", 0.05f);
+				animationState = Player_AnimationStates::JUMP;
+				break;
+
+			case UserInputData::U_MOVE_DOWN:
+				move(0.0f, 2.0f);
+				animatedSprite->playAnimation("MOVE_DOWN", 0.05f);
+				animationState = Player_AnimationStates::FALL;
+				break;
+
+			default:
+				break;
+		}	
 	}
 }
 
@@ -209,6 +238,8 @@ void Player::render(sf::RenderTarget& target)
 	if (sprite)
 	{
 		sprite->setPosition(hitboxPlayer->getPosition());
+		animatedSprite->setPosition(hitboxPlayer->getPosition());
+
 		/*
 		std::cout << "Sprite pos: " << sprite->getGlobalBounds().size.x << ", " << sprite->getGlobalBounds().size.y << std::endl;
 		std::cout << "Collider pos: " << hitboxPlayer->getGlobalBounds().position.x << ", " << hitboxPlayer->getGlobalBounds().position.y << std::endl;
@@ -218,7 +249,9 @@ void Player::render(sf::RenderTarget& target)
 
 		*/
 		//std::cout << "Sprite x: " << sprite->getPosition().x << " Sprite y: " << sprite->getPosition().y << std::endl;
-		target.draw(*sprite);
+		// 
+		//target.draw(*sprite);
+		animatedSprite->render(target);
 	}
 	hitboxPlayer->renderCollider(target);
 	sf::RectangleShape testRect(sf::Vector2f(sprite->getGlobalBounds().size.x, sprite->getGlobalBounds().size.y));

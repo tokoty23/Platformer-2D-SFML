@@ -1,11 +1,13 @@
 #include "stdafx.h"
 #include "StaticSprite.h"
 
-StaticSprite::StaticSprite(std::string textureName, sf::IntRect size, sf::Vector2f position)
+StaticSprite::StaticSprite(std::string textureName, sf::IntRect currentRect, sf::Vector2f position)
 {
+
+	this->currentRect = currentRect;
 	this->textureName = textureName;
 	initTexture(textureName);
-	initSprite(size);
+	initSprite(currentRect);
 	setPosition(position);
 }
 
@@ -42,6 +44,14 @@ sf::FloatRect StaticSprite::getGlobalBounds() const
 		return sprite->getGlobalBounds();
 	}
 	return sf::FloatRect();
+}
+
+void StaticSprite::setScale(sf::Vector2f scale)
+{
+	if (sprite)
+	{
+		sprite->setScale(scale);
+	}
 }
 
 void StaticSprite::render(sf::RenderTarget& target)

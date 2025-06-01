@@ -1,5 +1,7 @@
 #pragma once
 #include "Collider.h"
+#include "UserInput.h"
+#include "AnimatedSprite.h"
 
 enum Player_AnimationStates
 {
@@ -16,12 +18,17 @@ private:
 	//Sprite
 	sf::Texture texture;
 	std::optional<sf::Sprite> sprite;
+	std::unique_ptr<AnimatedSprite> animatedSprite;
 	//sf::Sprite sprite;
 
 	//Hitbox
 	std::unique_ptr<Collider> hitboxPlayer;
 	//Collider
 	//Collider* hitboxPlayer = nullptr;
+
+	//User Input
+	std::unique_ptr<UserInput> userInput;
+	std::vector<UserInputData> userInputData;
 	
 	//Animation
 	sf::IntRect currentFrame;
@@ -47,8 +54,14 @@ private:
 	void initPhysics();
 	
 public:
-	Player();
+	Player(std::string textureName, sf::IntRect currentRect, sf::Vector2f position);
 	virtual ~Player();
+
+	void setScale(sf::Vector2f scale)
+	{
+		animatedSprite->setScale(scale);
+		hitboxPlayer->setScale(scale);
+	}
 
 	Collider* getCollider() const
 	{

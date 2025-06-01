@@ -1,26 +1,26 @@
 #include "stdafx.h"
 #include "Tile.h"
 
-Tile::Tile(std::string textureName, sf::IntRect size, sf::Vector2f position, bool damaging)
+Tile::Tile(std::string textureName, sf::IntRect sizeHitbox, sf::IntRect sizeSprite, sf::Vector2f position, bool damaging)
 	: damaging(damaging)
 {
 	initTexture();
-	initSprite(textureName, size, position);
+	initSprite(textureName, sizeHitbox, sizeSprite, position);
 }
 
 void Tile::initTexture()
 {
-	if (!texture.loadFromFile("Textures/Soldier.png"))
+	if (!texture.loadFromFile("Textures/IDLE.png"))
 	{
 		std::cout << "ERROR Class Player: initTexture()";
 	}
 }
 
-void Tile::initSprite(std::string textureName, sf::IntRect size, sf::Vector2f position)
+void Tile::initSprite(std::string textureName, sf::IntRect sizeHitbox, sf::IntRect sizeSprite, sf::Vector2f position)
 {
-	sprite = std::make_unique<StaticSprite>(textureName, size, position);
+	sprite = std::make_unique<AnimatedSprite>(textureName, sizeSprite, position);
 	hitboxTile = std::make_unique<Collider>
-		( sf::FloatRect( { position }, { float(size.size.x), float(size.size.y) } ), position, 0.0f); //PROBLEMA are treaba cumva ca am schibmat din sprite->getGlobal
+		( sf::FloatRect( { position }, { float(sizeHitbox.size.x), float(sizeHitbox.size.y) } ), position, 0.0f); //PROBLEMA are treaba cumva ca am schibmat din sprite->getGlobal
 	// in constructorul lui collider parametrul dat la hitbox este salvat deci chiar daca setezi positia, isi va da update la valoarea din size
 
 
@@ -48,7 +48,7 @@ void Tile::render(sf::RenderTarget& target)
 	if (sprite)
 	{
 		sprite->setPosition(hitboxTile->getPosition());
-		sprite->render(target);
+		sprite->StaticSprite::render(target);
 	}
 	hitboxTile->renderCollider(target);
 }
