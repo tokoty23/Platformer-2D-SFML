@@ -11,6 +11,13 @@ StaticSprite::StaticSprite(std::string textureName, sf::IntRect currentRect, sf:
 	setPosition(position);
 }
 
+StaticSprite::StaticSprite(sf::Texture* texture, sf::IntRect currentRect, sf::Vector2f position)
+{
+	this->currentRect = currentRect;
+	initSprite(currentRect, texture);
+	setPosition(position);
+}
+
 StaticSprite::~StaticSprite()
 {
 }
@@ -19,13 +26,21 @@ void StaticSprite::initTexture(std::string textureName)
 {
 	if (!texture.loadFromFile("Textures/" + textureName))
 	{
-		std::cout << "ERROR Class StaticSprite: initTexture()";
+		std::cerr << "ERROR Class StaticSprite: initTexture(): " << textureName << std::endl;
 	}
 }
+
+
 
 void StaticSprite::initSprite(sf::IntRect size)
 {
 	sprite.emplace(texture);
+	sprite->setTextureRect(size);
+}
+
+void StaticSprite::initSprite(sf::IntRect size, sf::Texture* texture)
+{
+	sprite.emplace(*(texture));
 	sprite->setTextureRect(size);
 }
 

@@ -3,22 +3,22 @@
 #include "StaticSprite.h"
 #include "AnimatedSprite.h"
 
+
+
 class Tile
 {
 private:
 	//Sprite
-	sf::Texture texture;
-	//std::optional<sf::Sprite> sprite;
-	//std::unique_ptr<StaticSprite> sprite;
-	std::unique_ptr<AnimatedSprite> sprite;
-	//sf::Sprite sprite;
+	std::unique_ptr<StaticSprite> sprite;
 	const bool damaging;
+	const bool moveable;
 	std::unique_ptr<Collider> hitboxTile;
 public:
 	//Initialization functions
-	Tile(std::string textureName, sf::IntRect sizeHitbox, sf::IntRect sizeSprite, sf::Vector2f position, bool damaging = false);
-	void initTexture();
+	Tile(std::string textureName, sf::IntRect sizeHitbox, sf::IntRect sizeSprite, sf::Vector2f position, bool damaging = false, bool movable = false);
+	Tile(sf::Texture* texture, sf::IntRect sizeHitbox, sf::IntRect sizeSprite, sf::Vector2f position, bool damaging = false, bool movable = false);
 	void initSprite(std::string textureName, sf::IntRect sizeHitbox, sf::IntRect sizeSprite, sf::Vector2f position);
+	void initSprite(sf::Texture* texture, sf::IntRect sizeHitbox, sf::IntRect sizeSprite, sf::Vector2f position);
 	const sf::FloatRect getGlobalBounds() const;
 
 	Collider* getCollider() const
@@ -35,4 +35,5 @@ public:
 	void render(sf::RenderTarget& target);
 
 };
+
 

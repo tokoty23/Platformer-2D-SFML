@@ -44,10 +44,24 @@ sf::FloatRect Collider::getGlobalBounds() const
 	return hitbox;
 }
 
+void Collider::move(float x, float y, float deltaTime)
+{
+	hitbox.position.x += x * deltaTime;
+	hitbox.position.y += y * deltaTime;
+	std::cout << "Collider::move(float x, float y) called with x: " << x << ", y: " << y << std::endl;
+}
+
+void Collider::move(sf::Vector2f velocity, float deltaTime)
+{
+	hitbox.position.x += velocity.x * deltaTime;
+	hitbox.position.y += velocity.y * deltaTime;
+}
+
 void Collider::move(float x, float y)
 {
 	hitbox.position.x += x;
 	hitbox.position.y += y;
+	std::cout << "Collider::move(float x, float y) called with x: " << x << ", y: " << y << std::endl;
 }
 
 void Collider::move(sf::Vector2f velocity)
@@ -87,7 +101,7 @@ void Collider::renderCollider(sf::RenderTarget& target)
 	target.draw(hitboxShape);
 }
 
-bool Collider::checkCollision(Collider& other, float push, sf::RenderTarget& target)
+bool Collider::checkCollision(Collider& other, float push)
 {
 	sf::Vector2f otherPosisiton = other.getPosition();
 	sf::Vector2f otherHalfSize = other.getSize() / 2.0f;
@@ -100,34 +114,9 @@ bool Collider::checkCollision(Collider& other, float push, sf::RenderTarget& tar
 	float intersectX = std::abs(deltaX) - (otherHalfSize.x + thisHalfSize.x);
 	float intersectY = std::abs(deltaY) - (otherHalfSize.y + thisHalfSize.y);
 
-	/*
-	
-	circle.setOrigin(sf::Vector2f(circle.getRadius(), circle.getRadius()) ); // Center the origin
-	circle.setPosition(thisPosisiton + thisHalfSize); // Center on this collider
-	target.draw(circle);
-	circle.setPosition(otherPosisiton + otherHalfSize); // Center on this collider
-	target.draw(circle);
-	*/
-	//std::cout << "Collision Player x" << otherPosisiton.x << "Collision Player y" << otherPosisiton.y << std::endl;
-
-	
 	if (intersectX < 0 && intersectY < 0)
 	{
 		std::cout << "Collision detected" << std::endl;
-		sf::CircleShape circle;
-		circle.setRadius(50.0f); // Use a smaller radius
-		circle.setFillColor(sf::Color(0, 255, 255, 255));
-
-		sf::RectangleShape hitboxShape(otherHalfSize + otherHalfSize );
-		hitboxShape.setPosition(otherPosisiton + sf::Vector2f(10,10) );
-		hitboxShape.setFillColor(sf::Color(0, 255, 0, 150)); // Red, half transparent
-		target.draw(hitboxShape);
-
-		sf::RectangleShape hitboxShape2(thisHalfSize + thisHalfSize);
-		hitboxShape2.setPosition(thisPosisiton);
-		hitboxShape2.setFillColor(sf::Color(0, 255, 0, 150)); // Red, half transparent
-		target.draw(hitboxShape2);
-
 
 		push = std::clamp(push, 0.0f, 1.0f);
 

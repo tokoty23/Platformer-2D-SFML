@@ -4,32 +4,12 @@
 
 void Player::initVariables()
 {
-	animationState = Player_AnimationStates::IDLE;
 	userInput = std::make_unique<UserInput>();
-}
-
-void Player::initTexture()
-{
-	if (!texture.loadFromFile("Textures/spritesheet.png"))
-	{
-		std::cout << "ERROR Class Player: initTexture()";
-	}
-	
-
 }
 
 void Player::initSprite()
 {
 	
-
-	sprite.emplace(texture);
-	currentFrame = sf::IntRect({ 0, 0 }, { 100, 100 }); //{top left corner} {wide tall}
-	sprite->setTextureRect(currentFrame);
-	sprite->setScale({ 5.0f, 5.0f });
-	//std::cout << sprite->getGlobalBounds().size.x<< sprite->getGlobalBounds().size.x<<std::endl;
-	//sprite->setScale({ 5.0f, 5.0f });
-	//std::cout << sprite->getGlobalBounds().size.x << sprite->getGlobalBounds().size.x << std::endl;
-	hitboxPlayer = std::make_unique<Collider>(currentFrame, 0.0f); // collider size is the same as sprite size
 }
 
 void Player::initAnmation()
@@ -39,21 +19,23 @@ void Player::initAnmation()
 
 void Player::initPhysics()
 {
+	ENTITY_SPEED = 400.0f;
 	velocity = sf::Vector2f(0.0f, 0.0f);
-	maxVelocity = 20.0f;
+	maxVelocity = 300.0f;
 	minVelocity = 1.0f;
-	acceleration = 3.0f;
-	friction = 0.80f;
-	gravity = 3.0f;
-	maxGravity = 30.0f;
+	acceleration = 1000.0f;
+	friction = 0.90f;
+	gravity = 1200.0f;
+	maxGravity = 3000.0f;
 }
 
 
 
-Player::Player(std::string textureName, sf::IntRect currentRect, sf::Vector2f position)
+Player::Player(std::string textureName, sf::IntRect sizeHitbox, sf::IntRect sizeSprite, sf::Vector2f position)
 {
-
-	animatedSprite = std::make_unique<AnimatedSprite>(textureName, currentRect, position);
+	hitboxPlayer = std::make_unique<Collider>
+		(sf::FloatRect({ position }, { float(sizeHitbox.size.x), float(sizeHitbox.size.y) }), position, 0.0f);
+	animatedSprite = std::make_unique<AnimatedSprite>(textureName, sizeSprite, position);
 	//std::string textureName, sf::IntRect currentRect, sf::Vector2f position
 	animatedSprite->addAnimation("IDLE", 4, sf::IntRect({ 0, 0 }, { 100, 100 }), 0.2f);
 	animatedSprite->addAnimation("MOVE_LEFT", 4, sf::IntRect({ 0, 100 }, { 100, 100 }), 0.2f);
@@ -62,7 +44,7 @@ Player::Player(std::string textureName, sf::IntRect currentRect, sf::Vector2f po
 	animatedSprite->addAnimation("MOVE_DOWN", 4, sf::IntRect({ 0, 400 }, { 100, 100 }), 0.2f);
 	//std::string name, int frameCount, sf::IntRect frameSize, float frameTime, bool looping
 		
-	initTexture();
+
 	initSprite();	
 	initAnmation();
 	initPhysics();
@@ -95,38 +77,34 @@ void Player::resetVelocityY()
 	velocity.y = 0.0f;
 }
 
-void Player::move(const float x, const float y)
+void Player::move(const float x, const float y, float deltaTime)
 {
-	velocity.x += x * acceleration;
-	velocity.y += y * acceleration;
+	velocity.x += x * acceleration * deltaTime;
+	velocity.y += y * acceleration * deltaTime;
 
 	if (std::abs(velocity.x) > maxVelocity) velocity.x = maxVelocity * ((velocity.x < 0) ? -1.0f : 1.0f);
 	//if (std::abs(velocity.y) > maxVelocity) velocity.y = maxVelocity * ((velocity.y < 0) ? -1.0f : 1.0f);
 	
 }
 
-void Player::updatePhysics()
+void Player::updatePhysics(float deltaTime)
 {
 	//Gravity
-	velocity.y += 1.0f * gravity;
+	velocity.y += 1.0f * gravity * deltaTime;
 	if (std::abs(velocity.y) > maxGravity) velocity.y = maxGravity * ((velocity.y < 0) ? -1.0f : 1.0f);
-
+	std::cout << "Velocity Y: " << velocity.y << std::endl;
 	velocity *= friction;
 
 	if (std::abs(velocity.x) < minVelocity) velocity.x = 0.0f;
 	if (std::abs(velocity.y) < minVelocity) velocity.y = 0.0f;
 
-	hitboxPlayer->move(velocity);
-
-	
-	//std::cout << "velocity.x: " << velocity.x << "        ";
-	//std::cout << "velocity.y: " << velocity.y << std::endl;
-
+	hitboxPlayer->move(velocity, deltaTime);
 }
 
-void Player::updateMovement()
+// functia modifica doar viteza in functie de input, nu si pozitia
+void Player::updateMovement(float deltaTime)
 {
-	animationState = Player_AnimationStates::IDLE;
+	
 	userInputData = userInput->getUserInput();
 
 	for(const auto& input : userInputData)
@@ -134,27 +112,28 @@ void Player::updateMovement()
 		switch (input)
 		{
 			case UserInputData::U_MOVE_LEFT:
-				move(-2.0f, 0.0f);
-				animatedSprite->playAnimation("MOVE_LEFT", 0.05f);
-				animationState = Player_AnimationStates::LEFT;
+				move(-ENTITY_SPEED, 0.0f, deltaTime);
+				animatedSprite->playAnimation("MOVE_LEFT", deltaTime);
+				
 				break;
 
 			case UserInputData::U_MOVE_RIGHT:
-				move(2.0f, 0.0f);
-				animatedSprite->playAnimation("MOVE_RIGHT", 0.05f);
-				animationState = Player_AnimationStates::RIGHT;
+				move(ENTITY_SPEED, 0.0f, deltaTime);
+				animatedSprite->playAnimation("MOVE_RIGHT", deltaTime);
+				
 				break;
 
 			case UserInputData::U_MOVE_UP:
-				move(0.0f, -2.0f);
-				animatedSprite->playAnimation("MOVE_UP", 0.05f);
-				animationState = Player_AnimationStates::JUMP;
+				velocity.y = -600.0f; // reset vertical velocity when jumping
+				//move(0.0f, -ENTITY_SPEED, deltaTime);
+				animatedSprite->playAnimation("MOVE_UP", deltaTime);
+				
 				break;
 
 			case UserInputData::U_MOVE_DOWN:
-				move(0.0f, 2.0f);
-				animatedSprite->playAnimation("MOVE_DOWN", 0.05f);
-				animationState = Player_AnimationStates::FALL;
+				move(0.0f, ENTITY_SPEED, deltaTime);
+				animatedSprite->playAnimation("MOVE_DOWN", deltaTime);
+				
 				break;
 
 			default:
@@ -163,107 +142,20 @@ void Player::updateMovement()
 	}
 }
 
-void Player::updateAnimation()
+void Player::update(float deltaTime)
 {
-	if (animationState == Player_AnimationStates::IDLE)
-	{
-		if (animationClock.getElapsedTime().asSeconds() >= 0.1f)
-		{
-			currentFrame.position.x += 100;
-			currentFrame.position.y = 0;
-			if (currentFrame.position.x > 100 * 5) currentFrame.position.x = 0;
-			animationClock.restart();
-			sprite->setTextureRect(currentFrame);
-		}
-	}
-	
-	else 
-	{
-		if (animationClock.getElapsedTime().asSeconds() >= 0.1f)
-		{
-
-			{
-				switch (animationState)
-				{
-				case Player_AnimationStates::LEFT:
-					currentFrame.position.x += 100;
-					currentFrame.position.y = 200;
-					if (currentFrame.position.x > 100 * 5) currentFrame.position.x = 0;
-					if (currentFrame.size.x > 0) currentFrame.size.x *= -1;
-
-
-					break;
-
-				case Player_AnimationStates::RIGHT:
-					currentFrame.position.x += 100;
-					currentFrame.position.y = 200;
-					if (currentFrame.position.x > 100 * 5) currentFrame.position.x = 0;
-					if (currentFrame.size.x < 0) currentFrame.size.x *= -1;
-					//sprite->setScale({ 5.0f, 5.0f });
-					//sprite->setOrigin({ 0, 0 });
-					break;
-
-				case Player_AnimationStates::JUMP:
-					currentFrame.position.x += 100;
-					currentFrame.position.y = 300;
-					if (currentFrame.position.x > 100 * 5) currentFrame.position.x = 0;
-					break;
-
-				case Player_AnimationStates::FALL:
-					currentFrame.position.x += 100;
-					currentFrame.position.y = 400;
-					if (currentFrame.position.x > 100 * 5) currentFrame.position.x = 0;
-					break;
-
-				default:
-
-					break;
-				}
-			}
-			animationClock.restart();
-			sprite->setTextureRect(currentFrame);
-		}
-	}
-}
-
-void Player::update()
-{
-	updateMovement();
-	updateAnimation();
-	updatePhysics();
+	//updateMovement doar modifica viteza nu si pozitia, updatePhysics modifica pozitia in functie de viteza
+	updateMovement(deltaTime);
+	updatePhysics(deltaTime);
 }
 
 void Player::render(sf::RenderTarget& target)
 {
-	if (sprite)
+	if (animatedSprite)
 	{
-		sprite->setPosition(hitboxPlayer->getPosition());
-		animatedSprite->setPosition(hitboxPlayer->getPosition());
-
-		/*
-		std::cout << "Sprite pos: " << sprite->getGlobalBounds().size.x << ", " << sprite->getGlobalBounds().size.y << std::endl;
-		std::cout << "Collider pos: " << hitboxPlayer->getGlobalBounds().position.x << ", " << hitboxPlayer->getGlobalBounds().position.y << std::endl;
-		std::cout << "Collider pos: " << hitboxPlayer->getPosition().x << ", " << hitboxPlayer->getPosition().y << std::endl;
-		std::cout << "Collider size: " << hitboxPlayer->getGlobalBounds().size.x << ", " << hitboxPlayer->getGlobalBounds().size.y << std::endl;
-		std::cout << "Collider size: " << hitboxPlayer->getSize().x << ", " << hitboxPlayer->getSize().y << std::endl;
-
-		*/
-		//std::cout << "Sprite x: " << sprite->getPosition().x << " Sprite y: " << sprite->getPosition().y << std::endl;
-		// 
-		//target.draw(*sprite);
+		animatedSprite->setPosition(hitboxPlayer->getPosition());	
 		animatedSprite->render(target);
 	}
 	hitboxPlayer->renderCollider(target);
-	sf::RectangleShape testRect(sf::Vector2f(sprite->getGlobalBounds().size.x, sprite->getGlobalBounds().size.y));
-	testRect.setPosition(sf::Vector2f(sprite->getGlobalBounds().position.x, sprite->getGlobalBounds().position.y) );
-	testRect.setFillColor(sf::Color(255, 0, 0, 128));
-	target.draw(testRect);
 
-	sf::RectangleShape circle(sf::Vector2f(sprite->getGlobalBounds().size.x, sprite->getGlobalBounds().size.y));
-	//circle.setRadius(50.0f);
-	circle.setFillColor(sf::Color(255, 0, 0, 128)); // Red, half transparent
-	circle.setPosition(sprite->getPosition());
-	//target.draw(circle);
-	
-	
 }

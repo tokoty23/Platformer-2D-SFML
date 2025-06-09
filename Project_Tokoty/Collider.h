@@ -27,12 +27,14 @@ public:
 	}
 
 	//Functions
+	void move(float x, float y, float deltaTime);
+	void move(sf::Vector2f velocity, float deltaTime);
 	void move(float x, float y);
 	void move(sf::Vector2f velocity);
 	void setPosition(float x, float y);
 	void renderCollider(sf::RenderTarget& target, Collider& other);
 	void renderCollider(sf::RenderTarget& target);
-	bool checkCollision(Collider& other, float push, sf::RenderTarget& target);
+	bool checkCollision(Collider& other, float push);
 
 	
 

@@ -9,9 +9,12 @@ protected:
 	sf::IntRect currentRect;
 public:
 	StaticSprite(std::string textureName, sf::IntRect currentRect, sf::Vector2f position);
+	StaticSprite(sf::Texture* texture, sf::IntRect currentRect, sf::Vector2f position);
 	~StaticSprite();
 	void initTexture(std::string textureName);
 	void initSprite(sf::IntRect size);
+	void initSprite(sf::IntRect size, sf::Texture* texture);
+
 	void setPosition(sf::Vector2f position);
 	sf::FloatRect getGlobalBounds() const;
 	void setScale(sf::Vector2f scale);

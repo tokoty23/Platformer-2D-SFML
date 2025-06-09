@@ -36,7 +36,7 @@ void Animation::playAnimation(sf::Sprite& sprite, float deltaTime)
 	if (currentTime >= frameTime)
 	{
 		std::cout << "Playing animation frame: " << currentFrameIndex << std::endl;
-		currentTime = 0.0f;
+		currentTime = currentTime - frameTime;
 		sprite.setTextureRect(frames[currentFrameIndex]);
 		std::cout << frames[currentFrameIndex].position.x << " " << frames[currentFrameIndex].position.y << " + " <<  std::endl;
 		currentFrameIndex++;

@@ -9,3 +9,9 @@
 #include<SFML/Network.hpp>
 #include<SFML/System.hpp>
 #include<SFML/Window.hpp>
+
+//TMX parser
+#include<tmxlite/Map.hpp>
+#include<tmxlite/TileLayer.hpp>
+#include<tmxlite/Tileset.hpp>
+	
