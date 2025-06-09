@@ -31,8 +31,8 @@ void Entity::updatePhysics(float deltaTime)
 	if (std::abs(velocity.x) < minVelocity) velocity.x = 0.0f;
 	if (std::abs(velocity.y) < minVelocity) velocity.y = 0.0f;
 
-	if(hitbox) hitbox->move(velocity, deltaTime);
-	
+	if (hitbox) hitbox->move(velocity, deltaTime);
+
 }
 
 void Entity::move(const float x, const float y, float deltaTime)
@@ -51,7 +51,7 @@ void Entity::setScale(sf::Vector2f scale)
 	hitbox->setScale(scale);
 }
 
-Collider* Entity::getCollider() const 
+Collider* Entity::getCollider() const
 {
 	return hitbox.get();
 }
@@ -90,4 +90,3 @@ void Entity::render(sf::RenderTarget& target)
 	}
 	hitbox->renderCollider(target);
 }
-

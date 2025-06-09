@@ -12,7 +12,7 @@ protected:
 	std::unique_ptr<Collider> hitbox;
 
 	//Physics
-	float ENTITY_SPEED;
+	float speed;
 	sf::Vector2f velocity;
 	float maxVelocity;
 	float minVelocity;
@@ -30,7 +30,7 @@ public:
 	Entity(std::unique_ptr<Collider> hitbox, std::unique_ptr<AnimatedSprite> sprite);
 	virtual ~Entity() = default;
 
-	
+
 	void setScale(sf::Vector2f scale);
 	Collider* getCollider() const;
 
@@ -44,4 +44,3 @@ public:
 	virtual void update(float deltaTime);
 	virtual void render(sf::RenderTarget& target);
 };
-

@@ -9,7 +9,7 @@ private:
 	sf::RenderWindow window;
 	sf::Clock deltaClock;
 	//sf::Event event;
-	Player* player;
+	std::unique_ptr<Player> player;
 	Tile* tile1;
 	Tile* tile2;
 	Tile* tile3;

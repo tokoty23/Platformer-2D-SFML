@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "GameEngine.h"
 
 void GameEngine::initView()
@@ -18,7 +18,23 @@ void GameEngine::initWindow()
 
 void GameEngine::initPlayer()
 {
-	player = new Player("Soldier.png", sf::IntRect({ 0, 0 }, { 100, 100 }), sf::IntRect({ 0, 0 }, { 100, 100 }) , { 200, -300 } );
+	std::string textureName = "Soldier.png";
+	sf::IntRect sizeSprite = sf::IntRect({ 0, 0 }, { 100, 100 }); // Primul cadru pentru sprite
+	sf::IntRect sizeHitbox = sf::IntRect({ 0, 0 }, { 100, 100 }); // Dimensiunea pentru hitbox
+	sf::Vector2f startPosition = { 200.f, -300.f };
+
+	auto animatedSpriteComponent = std::make_unique<AnimatedSprite>(textureName, sizeSprite, startPosition);
+	auto colliderComponent = std::make_unique<Collider>(
+		sf::FloatRect({ startPosition }, { float(sizeHitbox.size.x), float(sizeHitbox.size.y) }),
+		startPosition,
+		0.0f
+	);
+
+	player = std::make_unique<Player>(
+		std::move(colliderComponent),
+		std::move(animatedSpriteComponent)
+	);
+
 	player->setScale({ 2.0f, 2.0f });
 }
 
@@ -48,7 +64,7 @@ GameEngine::GameEngine()
 
 GameEngine::~GameEngine()
 {
-	delete player;
+	//delete player;
 } 
 
 void GameEngine::updateView()
@@ -102,7 +118,7 @@ void GameEngine::update()
 	player->getCollider()->checkCollision(*tile2->getCollider(), 0.0f);
 	player->getCollider()->checkCollision(*tile3->getCollider(), 3.0f);
 	player->getCollider()->checkCollision(*tile4->getCollider(), 0.0f);
-	tileMap->update(player);
+	tileMap->update(player.get());
 	updateView();
 }
 
