@@ -5,22 +5,23 @@ void GameEngine::initView()
 {
 	sf::Vector2f plyayerCenter = player->getPosition();
 	plyayerCenter.x += player->getGlobalBounds().size.x / 2;
-	plyayerCenter.y += player->getGlobalBounds().size.y / 2;
-	view.setCenter(plyayerCenter);
-	window.setView(view);
+	plyayerCenter.y += player->getGlobalBounds().size.y / 2 + window.getSize().y / static_cast<float>(4);
+	//view.setCenter(plyayerCenter);
+	//window.setView(view);
 }
 
 void GameEngine::initWindow()
 {
 	window.create(sf::VideoMode({800,600}), "Project Tokoty", sf::Style::Close | sf::Style::Titlebar); //VideoMode::getDesktopMode()
+	//window.create(sf::VideoMode::getDesktopMode(), "Project Tokoty", sf::Style::Close | sf::Style::Titlebar);
 	window.setFramerateLimit(60); // customize option to be added
 }
 
 void GameEngine::initPlayer()
 {
-	std::string textureName = "Soldier.png";
-	sf::IntRect sizeSprite = sf::IntRect({ 0, 0 }, { 100, 100 }); // Primul cadru pentru sprite
-	sf::IntRect sizeHitbox = sf::IntRect({ 0, 0 }, { 100, 100 }); // Dimensiunea pentru hitbox
+	std::string textureName = "SPRITESHEET_1.png";
+	sf::IntRect sizeSprite = sf::IntRect({ 0, 0 }, { 48, 48 }); // Primul cadru pentru sprite
+	sf::IntRect sizeHitbox = sf::IntRect({ 0, 0 }, { 48-28, 48-12 }); // Dimensiunea pentru hitbox
 	sf::Vector2f startPosition = { 200.f, -300.f };
 
 	auto animatedSpriteComponent = std::make_unique<AnimatedSprite>(textureName, sizeSprite, startPosition);
@@ -35,7 +36,21 @@ void GameEngine::initPlayer()
 		std::move(animatedSpriteComponent)
 	);
 
-	player->setScale({ 2.0f, 2.0f });
+	player->setScale({ 5.0f, 5.0f });
+
+	sf::Vector2f startPosition2 = { 400.f, -300.f };
+	auto animatedSpriteComponent2 = std::make_unique<AnimatedSprite>(textureName, sizeSprite, startPosition);
+	auto colliderComponent2 = std::make_unique<Collider>(
+		sf::FloatRect({ startPosition2 }, { float(sizeHitbox.size.x), float(sizeHitbox.size.y) }),
+		startPosition,
+		0.0f, ColliderType::C_HITBOX_HURTBOX
+	);
+	
+	enemy = std::make_unique<Enemy>(
+		std::move(colliderComponent2),
+		std::move(animatedSpriteComponent2)
+	);
+	enemy->setScale({ 2.0f, 2.0f });
 }
 
 void GameEngine::initTile()
@@ -71,7 +86,7 @@ void GameEngine::updateView()
 {
 	sf::Vector2f plyayerCenter = player->getPosition();
 	plyayerCenter.x += player->getGlobalBounds().size.x / 2;
-	plyayerCenter.y += player->getGlobalBounds().size.y / 2;
+	plyayerCenter.y += player->getGlobalBounds().size.y / 2 - window.getSize().y / static_cast<float>(4);
 	view.setCenter(plyayerCenter);
 	window.setView(view);
 }
@@ -89,11 +104,13 @@ void GameEngine::updateCollisions()
 void GameEngine::updatePlayer(float deltaTime)
 {
 	player->update(deltaTime);
+	enemy->update(deltaTime);
 }
 
 void GameEngine::renderPlayer()
 {
 	player->render(window);
+	enemy->render(window);
 }
 
 void GameEngine::update()
@@ -118,7 +135,13 @@ void GameEngine::update()
 	player->getCollider()->checkCollision(*tile2->getCollider(), 0.0f);
 	player->getCollider()->checkCollision(*tile3->getCollider(), 3.0f);
 	player->getCollider()->checkCollision(*tile4->getCollider(), 0.0f);
+	player->getCollider()->checkCollision(*enemy->getCollider(), 0.5f);
+
+	enemy->getCollider()->checkCollision(*tile2->getCollider(), 0.0f);
+	enemy->getCollider()->checkCollision(*tile3->getCollider(), 0.0f);
+	enemy->getCollider()->checkCollision(*tile4->getCollider(), 0.0f);
 	tileMap->update(player.get());
+	tileMap->update(enemy.get());
 	updateView();
 }
 

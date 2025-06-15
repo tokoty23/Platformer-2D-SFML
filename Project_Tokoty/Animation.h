@@ -9,6 +9,7 @@ private:
 	float currentTime;
 	int currentFrameIndex;
 	bool looping;
+
 public:
 	Animation(int frameCount, sf::IntRect frameSize, float frameTime, bool looping = true);
 	Animation();

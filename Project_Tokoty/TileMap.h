@@ -1,6 +1,7 @@
 #pragma once
 #include "Tile.h"
 #include "Player.h"
+//#include "Enemy.h"
 
 class TileMap
 {
@@ -17,7 +18,7 @@ public:
 	TileMap(std::string tmxName, std::string textureName, sf::Vector2f scale = sf::Vector2f{1.0f, 1.0f});
 	~TileMap();
 
-	void update(Player* player);
+	void update(Entity* player);
 	void render(sf::RenderTarget& window);
 };
 

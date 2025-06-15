@@ -95,12 +95,15 @@ TileMap::~TileMap()
 }
 
 
-void TileMap::update(Player* player)
+void TileMap::update(Entity* player)
 {
 	for (const auto& row : tilesArray) {
 		for (const auto& tile : row) {
 			if (tile) {
+				if (player->getCollider()->intersects(*tile->getCollider())) //std::cout << "Collider::intersects() not implemented yet" << std::endl;
 				player->getCollider()->checkCollision(*tile->getCollider(), 0.0f);
+
+				
 			}
 		}
 	}

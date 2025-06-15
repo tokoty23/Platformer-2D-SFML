@@ -1,29 +1,19 @@
 #include "stdafx.h"
 #include "Collider.h"
 
-Collider::Collider(sf::FloatRect hitbox, sf::Vector2f position, float push) :
-	hitbox(hitbox)
+Collider::Collider(sf::FloatRect hitbox, sf::Vector2f position, float push, ColliderType type) 
+	: hitbox(hitbox), type(type)
 {
 
 }
 
-Collider::Collider(sf::IntRect hitbox, sf::Vector2f position, float push) :
-	Collider(sf::FloatRect(hitbox), position, push)
+Collider::Collider(sf::IntRect hitbox, sf::Vector2f position, float push, ColliderType type) 
+	: Collider(sf::FloatRect(hitbox), position, push, type)
 {
 
 }
 
-Collider::Collider(sf::FloatRect hitbox, float push) :
-	hitbox(hitbox)
-{
 
-}
-
-Collider::Collider(sf::IntRect hitbox, float push) :
-	Collider(sf::FloatRect(hitbox), push)
-{
-
-}
 
 Collider::~Collider()
 {
@@ -44,11 +34,25 @@ sf::FloatRect Collider::getGlobalBounds() const
 	return hitbox;
 }
 
+ColliderType Collider::getType() const
+{
+	return type;
+}
+
+void Collider::setSize(float width, float height) {
+	hitbox.size.x = width;
+	hitbox.size.y = height;
+}
+
+void Collider::setScale(sf::Vector2f scale) {
+	hitbox.size.x *= scale.x;
+	hitbox.size.y *= scale.y;
+}
+
 void Collider::move(float x, float y, float deltaTime)
 {
 	hitbox.position.x += x * deltaTime;
 	hitbox.position.y += y * deltaTime;
-	std::cout << "Collider::move(float x, float y) called with x: " << x << ", y: " << y << std::endl;
 }
 
 void Collider::move(sf::Vector2f velocity, float deltaTime)
@@ -61,7 +65,6 @@ void Collider::move(float x, float y)
 {
 	hitbox.position.x += x;
 	hitbox.position.y += y;
-	std::cout << "Collider::move(float x, float y) called with x: " << x << ", y: " << y << std::endl;
 }
 
 void Collider::move(sf::Vector2f velocity)
@@ -76,28 +79,38 @@ void Collider::setPosition(float x, float y)
 	hitbox.position.y = y;
 }
 
-void Collider::renderCollider(sf::RenderTarget& target, Collider& other)
+bool Collider::intersects(Collider& other) const
 {
-	sf::Vector2f otherPosisiton = other.getPosition();
-	sf::Vector2f otherHalfSize = other.getSize() / 2.0f;
-	sf::Vector2f pos;
-	pos.x = otherPosisiton.x + otherHalfSize.x;
-	pos.y = otherPosisiton.y + otherHalfSize.y;
-	sf::CircleShape circle;
-	circle.setPosition(pos);
-	circle.setFillColor(sf::Color(0, 255, 255, 128)); // Red, half transparent
-	circle.setRadius(50.0f);
-	target.draw(circle);
-	sf::RectangleShape hitboxShape(sf::Vector2f(other.getSize()));
-
+	// findIntersection returneaza un std::optional<sf::FloatRect> care este empty daca nu exista intersectie
+	return this->hitbox.findIntersection(other.getGlobalBounds()).has_value();
 }
+
 
 void Collider::renderCollider(sf::RenderTarget& target)
 {
 	
 	sf::RectangleShape hitboxShape(sf::Vector2f(hitbox.size));
 	hitboxShape.setPosition(hitbox.position);
-	hitboxShape.setFillColor(sf::Color(0, 0, 255, 128)); // Red, half transparent
+
+	switch (type)
+	{
+	case ColliderType::C_HITBOX:
+		hitboxShape.setFillColor(sf::Color(0, 0, 255, 128)); // Red, half transparent
+		break;
+	case ColliderType::C_HURTBOX:
+		hitboxShape.setFillColor(sf::Color(0, 255, 255, 128)); // Red, half transparent
+		break;
+	case ColliderType::C_ATTACKBOX:
+		break;
+	case ColliderType::C_HITBOX_HURTBOX:
+		hitboxShape.setFillColor(sf::Color(255, 0, 0, 128)); // Red, half transparent
+		break;
+	case ColliderType::C_TRIGGERBOX:
+		break;
+	default:
+		break;
+	}
+
 	target.draw(hitboxShape);
 }
 
@@ -116,8 +129,6 @@ bool Collider::checkCollision(Collider& other, float push)
 
 	if (intersectX < 0 && intersectY < 0)
 	{
-		std::cout << "Collision detected" << std::endl;
-
 		push = std::clamp(push, 0.0f, 1.0f);
 
 		if (intersectX > intersectY)

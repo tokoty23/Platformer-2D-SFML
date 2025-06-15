@@ -1,6 +1,15 @@
 #include "stdafx.h"
 #include "Entity.h"
 
+
+Entity::Entity(std::unique_ptr<Collider> hitbox, std::unique_ptr<AnimatedSprite> sprite)
+	: hitbox(std::move(hitbox)), animatedSprite(std::move(sprite))
+{
+	initPhysics();
+	calculateSpriteOffset(false);
+	std::cout << "spriteOffset: " << spriteOffset.x << " " << spriteOffset.y << std::endl;
+}
+
 void Entity::initPhysics()
 {
 	speed = 0.0f;
@@ -14,18 +23,28 @@ void Entity::initPhysics()
 	isGrounded = false;
 }
 
-Entity::Entity(std::unique_ptr<Collider> hitbox, std::unique_ptr<AnimatedSprite> sprite)
-	: hitbox(std::move(hitbox)), animatedSprite(std::move(sprite))
+void Entity::calculateSpriteOffset(bool centered)
 {
-	initPhysics();
+	if (animatedSprite && hitbox)
+	{
+		sf::FloatRect bounds = animatedSprite->getGlobalBounds();
+		spriteOffset.x = (hitbox->getSize().x - animatedSprite->getGlobalBounds().size.x) / 2.0f;
+		//in functie de centered se alege daca offsetul sa fie impartit jumatate sus si jumatate jos sau doar complet sus
+		spriteOffset.y = (hitbox->getSize().y - animatedSprite->getGlobalBounds().size.y) / (centered ? 2.0f : 1.0f);
+
+	}
+	else
+	{
+		spriteOffset = sf::Vector2f(0.f, 0.f);
+	}
 }
+
 
 void Entity::updatePhysics(float deltaTime)
 {
 	//Gravity
 	velocity.y += 1.0f * gravity * deltaTime;
 	if (std::abs(velocity.y) > maxGravity) velocity.y = maxGravity * ((velocity.y < 0) ? -1.0f : 1.0f);
-	std::cout << "Velocity Y: " << velocity.y << std::endl;
 	velocity *= friction;
 
 	if (std::abs(velocity.x) < minVelocity) velocity.x = 0.0f;
@@ -49,6 +68,8 @@ void Entity::setScale(sf::Vector2f scale)
 {
 	animatedSprite->setScale(scale);
 	hitbox->setScale(scale);
+	this->spriteOffset.x *= scale.x;
+	this->spriteOffset.y *= scale.y;
 }
 
 Collider* Entity::getCollider() const
@@ -76,17 +97,20 @@ void Entity::resetVelocityY()
 	velocity.y = 0.0f;
 }
 
+// \brief updateaza fizica entitatii
 void Entity::update(float deltaTime)
 {
 	updatePhysics(deltaTime);
 }
 
+// \brief randeaza entitatea
 void Entity::render(sf::RenderTarget& target)
 {
-	if (animatedSprite)
-	{
-		animatedSprite->setPosition(hitbox->getPosition());
-		animatedSprite->render(target);
-	}
-	hitbox->renderCollider(target);
+		if (animatedSprite && hitbox)
+		{
+			animatedSprite->setPosition(hitbox->getPosition() + spriteOffset);
+			animatedSprite->render(target);
+		}
+		hitbox->renderCollider(target);
+
 }

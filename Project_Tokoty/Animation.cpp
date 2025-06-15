@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "Animation.h"
 
+
+
 Animation::Animation(int frameCount, sf::IntRect frameSize, float frameTime, bool looping)
 {
 	this->frameTime = frameTime;
@@ -12,7 +14,7 @@ Animation::Animation(int frameCount, sf::IntRect frameSize, float frameTime, boo
 	{
 		sf::IntRect frameRect = frameSize;
 		frameRect.position.x += i * frameSize.size.x;
-		frameRect.position.y += i * frameSize.size.y;
+		//frameRect.position.y += i * frameSize.size.y;
 		//std::cout << "Playing animation frame: " << frameRect.position.x << "  "<< frameRect.position.y << std::endl;
 		frames.push_back(frameRect);
 	}
@@ -27,7 +29,12 @@ Animation::Animation(int frameCount, sf::IntRect frameSize, float frameTime, boo
 
 Animation::Animation()
 {
+	currentFrameIndex = 0;
+	frameTime = 0.0f;
+	currentTime = 0.0f;
+	looping = false;
 }
+
 
 void Animation::playAnimation(sf::Sprite& sprite, float deltaTime)
 {

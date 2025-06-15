@@ -7,6 +7,7 @@ class Entity
 protected:
 	//Sprite
 	std::unique_ptr<AnimatedSprite> animatedSprite;
+	sf::Vector2f spriteOffset; //offset dintre coltul stanga sus al sprite-ului si collider-ul asociat
 
 	//Hitbox
 	std::unique_ptr<Collider> hitbox;
@@ -23,9 +24,12 @@ protected:
 
 	bool isGrounded;
 
+	//Combat Stats
+
 	void updatePhysics(float deltaTime);
 	void move(const float x, const float y, float deltaTime);
 	virtual void initPhysics();
+	virtual void calculateSpriteOffset(bool centered);
 public:
 	Entity(std::unique_ptr<Collider> hitbox, std::unique_ptr<AnimatedSprite> sprite);
 	virtual ~Entity() = default;

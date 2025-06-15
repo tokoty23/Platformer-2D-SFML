@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Player.h"
+#include "Enemy.h"
 #include "Tile.h"
 #include "TileMap.h"
 
@@ -10,6 +11,7 @@ private:
 	sf::Clock deltaClock;
 	//sf::Event event;
 	std::unique_ptr<Player> player;
+	std::unique_ptr<Enemy> enemy;
 	Tile* tile1;
 	Tile* tile2;
 	Tile* tile3;
