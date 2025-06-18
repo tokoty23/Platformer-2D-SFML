@@ -54,16 +54,16 @@ void Collider::setScale(sf::Vector2f scale) {
 	hitbox.size.y *= scale.y;
 }
 
-void Collider::move(float x, float y, float deltaTime)
+void Collider::move(float x, float y, sf::Time deltaTime)
 {
-	hitbox.position.x += x * deltaTime;
-	hitbox.position.y += y * deltaTime;
+	hitbox.position.x += x * deltaTime.asSeconds();
+	hitbox.position.y += y * deltaTime.asSeconds();
 }
 
-void Collider::move(sf::Vector2f velocity, float deltaTime)
+void Collider::move(sf::Vector2f velocity, sf::Time deltaTime)
 {
-	hitbox.position.x += velocity.x * deltaTime;
-	hitbox.position.y += velocity.y * deltaTime;
+	hitbox.position.x += velocity.x * deltaTime.asSeconds();
+	hitbox.position.y += velocity.y * deltaTime.asSeconds();
 }
 
 void Collider::move(float x, float y)

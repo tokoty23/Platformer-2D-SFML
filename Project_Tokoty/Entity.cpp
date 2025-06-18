@@ -35,6 +35,12 @@ void Entity::initCombatStats()
 	health = maxHealth;
 	attackDamage = 10.0f;
 
+	facingRight = true;
+
+	attackCooldownTimer.setDuration(sf::seconds(2.0f)); //timp de asteptare intre atacuri
+	attackDurationTimer.setDuration(sf::seconds(0.7f)); //cat timp este activ attackbox-ul
+	invincibilityTimer.setDuration(sf::seconds(1.0f)); //cat timp este inactiv hurtbox-ul dupa ce entity a fost atacat
+
 }
 
 void Entity::calculateSpriteOffset(bool centered)
@@ -51,6 +57,39 @@ void Entity::calculateSpriteOffset(bool centered)
 	else
 	{
 		spriteOffset = sf::Vector2f(0.f, 0.f);
+	}
+}
+
+void Entity::updateTimers(sf::Time deltaTime)
+{
+	attackCooldownTimer.update(deltaTime);
+	attackDurationTimer.update(deltaTime);
+	invincibilityTimer.update(deltaTime);
+	
+	if (!attackDurationTimer.isActive())
+	{
+		Collider* attackBox = getCollider(ColliderKeys::E_ATTACKBOX_DEFAULT);
+		if (attackBox)
+		{
+			attackBox->setActive(false);
+		}
+	}
+
+	if (!invincibilityTimer.isActive())
+	{
+		Collider* hurtBox = getCollider(ColliderKeys::E_HURTBOX);
+		if (hurtBox)
+		{
+			hurtBox->setActive(true);
+		}
+	}
+	else
+	{
+		Collider* hurtBox = getCollider(ColliderKeys::E_HURTBOX);
+		if (hurtBox)
+		{
+			hurtBox->setActive(false);
+		}
 	}
 }
 
@@ -76,11 +115,10 @@ void Entity::syncCollidersWithHitbox()
 
 }
 
-
-void Entity::updatePhysics(float deltaTime)
+void Entity::updatePhysics(sf::Time deltaTime)
 {
 	//Gravity
-	velocity.y += 1.0f * gravity * deltaTime;
+	velocity.y += 1.0f * gravity * deltaTime.asSeconds();
 	if (std::abs(velocity.y) > maxGravity) velocity.y = maxGravity * ((velocity.y < 0) ? -1.0f : 1.0f);
 	velocity *= friction;
 
@@ -91,10 +129,14 @@ void Entity::updatePhysics(float deltaTime)
 	if (collider) collider->move(velocity, deltaTime);
 }
 
-void Entity::move(const float x, const float y, float deltaTime)
+void Entity::updateAnimation(sf::Time deltaTime)
 {
-	velocity.x += x * acceleration * deltaTime;
-	velocity.y += y * acceleration * deltaTime;
+}
+
+void Entity::move(const float x, const float y, sf::Time deltaTime)
+{
+	velocity.x += x * acceleration * deltaTime.asSeconds();
+	velocity.y += y * acceleration * deltaTime.asSeconds();
 
 	if (std::abs(velocity.x) > maxVelocity) velocity.x = maxVelocity * ((velocity.x < 0) ? -1.0f : 1.0f);
 	//if (std::abs(velocity.y) > maxVelocity) velocity.y = maxVelocity * ((velocity.y < 0) ? -1.0f : 1.0f);
@@ -114,6 +156,7 @@ void Entity::addCollider(std::unique_ptr<Collider> collider, ColliderKeys key)
 				
 				sf::Vector2f offset = collider->getPosition() - hitbox->getPosition();
 				collidersOffset[key] = offset;
+				if(key == ColliderKeys::E_ATTACKBOX_DEFAULT) collidersOffset[ColliderKeys::E_ATTACKBOX_DEFAULT_INITIAL] = offset;
 				std::cout << "collider added pos" << collider->getPosition().x << " " << collider->getPosition().y << std::endl;
 				std::cout << "hitbox added pos" << hitbox->getPosition().x << " " << hitbox->getPosition().y << std::endl;
 				std::cout << "offset" << offset.x << " " << offset.y<< std::endl;
@@ -132,6 +175,16 @@ Collider* Entity::getCollider(ColliderKeys key) const
 		return it->second.get();
 	}
 	return nullptr;
+}
+
+sf::Vector2f Entity::getColliderOffset(ColliderKeys key) const
+{
+	auto it = collidersOffset.find(key);
+	if (it != collidersOffset.end())
+	{
+		return it->second;
+	}
+	return sf::Vector2f();
 }
 
 std::vector<Collider*> Entity::getColliders() const
@@ -197,9 +250,11 @@ void Entity::resetVelocityY()
 }
 
 // \brief updateaza fizica entitatii
-void Entity::update(float deltaTime)
+void Entity::update(sf::Time deltaTime)
 {
 	updatePhysics(deltaTime);
+	updateTimers(deltaTime);
+	updateAnimation(deltaTime);
 	//syncCollidersWithHitbox();
 }
 
@@ -218,6 +273,10 @@ void Entity::render(sf::RenderTarget& target)
 			}
 		}
 
+}
+
+void Entity::attack()
+{
 }
 
 void Entity::takeDamage(float damage)

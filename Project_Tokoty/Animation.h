@@ -14,7 +14,7 @@ public:
 	Animation(int frameCount, sf::IntRect frameSize, float frameTime, bool looping = true);
 	Animation();
 	~Animation() = default;
-	void playAnimation(sf::Sprite& sprite, float deltaTime);
+	void playAnimation(sf::Sprite& sprite, sf::Time deltaTime, bool mirrored = false);
 	bool isLooping();
 	float getFrameTime();
 	float getLooping();

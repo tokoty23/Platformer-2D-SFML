@@ -7,7 +7,7 @@ enum class UserInputData
 	U_MOVE_RIGHT,
 	U_MOVE_UP,
 	U_MOVE_DOWN,
-	U_ATTACK,
+	U_ATTACK_DEFAULT,
 	U_DASH
 };
 

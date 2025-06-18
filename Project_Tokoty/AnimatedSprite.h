@@ -12,12 +12,12 @@ public:
 	AnimatedSprite(std::string textureName, sf::IntRect currentRect, sf::Vector2f position);
 	~AnimatedSprite() = default;
 	void addAnimation(std::string name, int frameCount, sf::IntRect frameSize, float frameTime, bool looping = true);
-	void playAnimation(std::string name, float deltaTime);
+	void playAnimation(std::string name, sf::Time deltaTime, bool mirrored = false);
 	//frameCount, frameSize, frameTime, looping
 	void render(sf::RenderTarget& target);
 
 
-	void update(float deltaTime);
+	void update(sf::Time deltaTime);
 	void draw(float x, float y);
 	void setLooping(bool looping);
 	void setFrame(int frameIndex);

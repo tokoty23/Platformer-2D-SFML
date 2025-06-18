@@ -36,16 +36,23 @@ Animation::Animation()
 }
 
 
-void Animation::playAnimation(sf::Sprite& sprite, float deltaTime)
+void Animation::playAnimation(sf::Sprite& sprite, sf::Time deltaTime, bool mirrored)
 {
 	
-	currentTime += deltaTime;
+	currentTime += deltaTime.asSeconds();
 	if (currentTime >= frameTime)
 	{
-		std::cout << "Playing animation frame: " << currentFrameIndex << std::endl;
 		currentTime = currentTime - frameTime;
-		sprite.setTextureRect(frames[currentFrameIndex]);
-		std::cout << frames[currentFrameIndex].position.x << " " << frames[currentFrameIndex].position.y << " + " <<  std::endl;
+		sf::IntRect frameRect = frames[currentFrameIndex];
+		
+		if (mirrored)
+		{
+			frameRect.position.x += frameRect.size.x;
+			frameRect.size.x = -frameRect.size.x;
+		}
+		sprite.setTextureRect(frameRect);
+		//std::cout << "Playing animation frame: " << currentFrameIndex << std::endl;
+		//std::cout << frames[currentFrameIndex].position.x << " " << frames[currentFrameIndex].position.y << " + " <<  std::endl;
 		currentFrameIndex++;
 		if (currentFrameIndex >= frames.size())
 		{

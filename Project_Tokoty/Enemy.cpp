@@ -45,7 +45,7 @@ void Enemy::initBehaviour()
 
 }
 
-void Enemy::update(float deltaTime)
+void Enemy::update(sf::Time deltaTime)
 {
 	//updateMovement doar modifica viteza nu si pozitia, updatePhysics modifica pozitia in functie de viteza
 	updateEnemyBehaviour(deltaTime);
@@ -54,7 +54,7 @@ void Enemy::update(float deltaTime)
 	
 }
 
-void Enemy::updateEnemyBehaviour(float deltaTime)
+void Enemy::updateEnemyBehaviour(sf::Time deltaTime)
 {
 	switch (state)
 	{

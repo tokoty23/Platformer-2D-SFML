@@ -36,8 +36,8 @@ public:
 	void setPosition(float x, float y);
 
 	//Functions
-	void move(float x, float y, float deltaTime);
-	void move(sf::Vector2f velocity, float deltaTime);
+	void move(float x, float y, sf::Time deltaTime);
+	void move(sf::Vector2f velocity, sf::Time deltaTime);
 	void move(float x, float y);
 	void move(sf::Vector2f velocity);
 	

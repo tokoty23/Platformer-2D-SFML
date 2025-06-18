@@ -60,7 +60,8 @@ void GameEngine::run()
 
 	while (window.isOpen())
 	{
-		float deltaTime = deltaClock.restart().asSeconds();
+		// .restart() returneaza timpul de la ultimul frame inainte de a-l reseta
+		sf::Time deltaTime = deltaClock.restart();
 		pollEvents();
 		updateEntities(deltaTime);
 		updatePhysicsColliders();
@@ -90,7 +91,7 @@ void GameEngine::pollEvents()
 	}
 }
 
-void GameEngine::updateEntities(float deltaTime)
+void GameEngine::updateEntities(sf::Time deltaTime)
 {
 	player->update(deltaTime);
 	for (auto& enemy : enemies)

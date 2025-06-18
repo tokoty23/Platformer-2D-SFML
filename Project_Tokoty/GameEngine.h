@@ -25,7 +25,7 @@ private:
 	
 	//
 	void pollEvents();
-	void updateEntities(float deltaTime);
+	void updateEntities(sf::Time deltaTime);
 	void updatePhysicsColliders();
 	void updateCombatColliders();
 	void updateView();

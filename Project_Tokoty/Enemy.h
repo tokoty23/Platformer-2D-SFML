@@ -24,12 +24,12 @@ protected:
 	void initAnmation();
 	void initPhysics() override;
 	void virtual initBehaviour();
-	virtual void updateEnemyBehaviour(float deltaTime);
+	virtual void updateEnemyBehaviour(sf::Time deltaTime);
 public:
 	Enemy(std::unique_ptr<Collider> hitbox, std::unique_ptr<AnimatedSprite> sprite);
 	virtual ~Enemy() override = default;
 
-	void update(float deltaTime) override;
+	void update(sf::Time deltaTime) override;
 	
 
 };

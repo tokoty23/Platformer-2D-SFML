@@ -13,12 +13,12 @@ void AnimatedSprite::addAnimation(std::string name, int frameCount, sf::IntRect 
 	animations.emplace(name, Animation(frameCount, frameSize, frameTime, looping));
 }
 
-void AnimatedSprite::playAnimation(std::string name, float deltaTime)
+void AnimatedSprite::playAnimation(std::string name, sf::Time deltaTime, bool mirrored)
 {
     if (sprite)
     {
 		
-        animations[name].playAnimation(sprite.value(), deltaTime); // sprite ul este std::optional trebuie apelat .value()
+        animations[name].playAnimation(sprite.value(), deltaTime, mirrored); // sprite ul este std::optional trebuie apelat .value()
     }
 }
 
