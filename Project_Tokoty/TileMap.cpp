@@ -13,7 +13,7 @@ void TileMap::initTilesetTexture(std::string textureName)
 }
 
 
-// \brief Parse
+// \brief Parseaza fisierul TMX folosind libraria tmx
 void TileMap::parseTMX(std::string tmxName)
 {
 	tmx::Map map;
@@ -100,8 +100,8 @@ void TileMap::update(Entity* player)
 	for (const auto& row : tilesArray) {
 		for (const auto& tile : row) {
 			if (tile) {
-				if (player->getCollider()->intersects(*tile->getCollider())) //std::cout << "Collider::intersects() not implemented yet" << std::endl;
-				player->getCollider()->checkCollision(*tile->getCollider(), 0.0f);
+				if (player->getCollider(ColliderKeys::E_HITBOX)->intersects(*tile->getCollider())) //std::cout << "Collider::intersects() not implemented yet" << std::endl;
+				player->getCollider(ColliderKeys::E_HITBOX)->checkCollision(*tile->getCollider(), 0.0f);
 
 				
 			}

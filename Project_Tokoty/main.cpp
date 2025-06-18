@@ -8,8 +8,7 @@ int main()
 	GameEngine game;
 	while (game.getWindow().isOpen())
 	{
-		game.update();
-		game.render();
+		game.run();
 	}
 	return 0;
 }

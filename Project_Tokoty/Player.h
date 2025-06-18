@@ -20,5 +20,4 @@ public:
 
 	void updateMovement(float deltaTime);
 	void update(float deltaTime) override;
-	//void render(sf::RenderTarget& target); //Entity.h
 };

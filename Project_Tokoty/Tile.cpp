@@ -20,7 +20,7 @@ void Tile::initSprite(std::string textureName, sf::IntRect sizeHitbox, sf::IntRe
 {
 	sprite = std::make_unique<StaticSprite>(textureName, sizeSprite, position);
 	hitboxTile = std::make_unique<Collider>
-		( sf::FloatRect( { position }, { float(sizeHitbox.size.x), float(sizeHitbox.size.y) } ), position, 0.0f); //PROBLEMA are treaba cumva ca am schibmat din sprite->getGlobal
+		( sf::FloatRect( { position }, { float(sizeHitbox.size.x), float(sizeHitbox.size.y) } ), 0.0f); //PROBLEMA are treaba cumva ca am schibmat din sprite->getGlobal
 	// in constructorul lui collider parametrul dat la hitbox este salvat deci chiar daca setezi positia, isi va da update la valoarea din size	
 }
 
@@ -28,7 +28,7 @@ void Tile::initSprite(sf::Texture* texture, sf::IntRect sizeHitbox, sf::IntRect 
 {
 	sprite = std::make_unique<StaticSprite>(texture, sizeSprite, position);
 	hitboxTile = std::make_unique<Collider>
-		(sf::FloatRect({ position }, { float(sizeHitbox.size.x), float(sizeHitbox.size.y) }), position, 0.0f);
+		(sf::FloatRect({ position }, { float(sizeHitbox.size.x), float(sizeHitbox.size.y) }), 0.0f);
 }
 
 const sf::FloatRect Tile::getGlobalBounds() const

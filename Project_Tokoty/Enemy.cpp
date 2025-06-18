@@ -4,6 +4,23 @@
 Enemy::Enemy(std::unique_ptr<Collider> hitbox, std::unique_ptr<AnimatedSprite> sprite)
 	: Entity(std::move(hitbox), std::move(sprite))
 {
+	Collider* collider = getCollider(ColliderKeys::E_HITBOX);
+	if (!collider)
+	{
+		std::cerr << "ERROR Class Player: constructor" << std::endl;
+		return;
+	}
+
+	sf::Vector2f hitboxSize = collider->getSize();
+	sf::Vector2f hitboxPosition = collider->getPosition();
+	sf::FloatRect hitboxRect = collider->getGlobalBounds();
+	auto hurtbox = std::make_unique<Collider>(hitboxRect, 0.0f, ColliderType::C_HURTBOX);
+	addCollider(std::move(hurtbox), ColliderKeys::E_HURTBOX);
+	//hitboxRect.position.x += hitboxRect.size.x;
+	auto attackbox = std::make_unique<Collider>(hitboxRect, 0.f, ColliderType::C_ATTACKBOX);
+	attackbox->setActive(true);
+	addCollider(std::move(attackbox), ColliderKeys::E_ATTACKBOX_DEFAULT);
+
 	initPhysics();
 	initBehaviour();
 }

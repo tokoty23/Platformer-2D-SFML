@@ -1,14 +1,14 @@
 #include "stdafx.h"
 #include "Collider.h"
 
-Collider::Collider(sf::FloatRect hitbox, sf::Vector2f position, float push, ColliderType type) 
+Collider::Collider(sf::FloatRect hitbox, float push, ColliderType type) 
 	: hitbox(hitbox), type(type)
 {
-
+	c_isActive = true;
 }
 
-Collider::Collider(sf::IntRect hitbox, sf::Vector2f position, float push, ColliderType type) 
-	: Collider(sf::FloatRect(hitbox), position, push, type)
+Collider::Collider(sf::IntRect hitbox, float push, ColliderType type) 
+	: Collider(sf::FloatRect(hitbox), push, type)
 {
 
 }
@@ -37,6 +37,11 @@ sf::FloatRect Collider::getGlobalBounds() const
 ColliderType Collider::getType() const
 {
 	return type;
+}
+
+void Collider::setActive(bool active)
+{
+	c_isActive = active;
 }
 
 void Collider::setSize(float width, float height) {
@@ -79,8 +84,15 @@ void Collider::setPosition(float x, float y)
 	hitbox.position.y = y;
 }
 
+
+bool Collider::isActive() const
+{
+	return c_isActive;
+}
+
 bool Collider::intersects(Collider& other) const
 {
+	if (!c_isActive || !other.isActive()) return false;
 	// findIntersection returneaza un std::optional<sf::FloatRect> care este empty daca nu exista intersectie
 	return this->hitbox.findIntersection(other.getGlobalBounds()).has_value();
 }
@@ -88,7 +100,7 @@ bool Collider::intersects(Collider& other) const
 
 void Collider::renderCollider(sf::RenderTarget& target)
 {
-	
+	if (!c_isActive) return;
 	sf::RectangleShape hitboxShape(sf::Vector2f(hitbox.size));
 	hitboxShape.setPosition(hitbox.position);
 
@@ -98,12 +110,10 @@ void Collider::renderCollider(sf::RenderTarget& target)
 		hitboxShape.setFillColor(sf::Color(0, 0, 255, 128)); // Red, half transparent
 		break;
 	case ColliderType::C_HURTBOX:
-		hitboxShape.setFillColor(sf::Color(0, 255, 255, 128)); // Red, half transparent
+		hitboxShape.setFillColor(sf::Color(255, 255, 255, 128)); // Red, half transparent
 		break;
 	case ColliderType::C_ATTACKBOX:
-		break;
-	case ColliderType::C_HITBOX_HURTBOX:
-		hitboxShape.setFillColor(sf::Color(255, 0, 0, 128)); // Red, half transparent
+		hitboxShape.setFillColor(sf::Color(255, 255, 0, 128)); // Green, half transparent
 		break;
 	case ColliderType::C_TRIGGERBOX:
 		break;
@@ -116,6 +126,7 @@ void Collider::renderCollider(sf::RenderTarget& target)
 
 bool Collider::checkCollision(Collider& other, float push)
 {
+	if (!c_isActive || !other.isActive()) return false;
 	sf::Vector2f otherPosisiton = other.getPosition();
 	sf::Vector2f otherHalfSize = other.getSize() / 2.0f;
 	sf::Vector2f thisPosisiton = getPosition();

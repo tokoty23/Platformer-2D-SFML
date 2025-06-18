@@ -7,31 +7,38 @@
 class GameEngine
 {
 private:
+	//Window
 	sf::RenderWindow window;
 	sf::Clock deltaClock;
-	//sf::Event event;
-	std::unique_ptr<Player> player;
-	std::unique_ptr<Enemy> enemy;
-	Tile* tile1;
-	Tile* tile2;
-	Tile* tile3;
-	Tile* tile4;
-	TileMap* tileMap;
 	sf::View view;
+	//sf::Event event;
 
+	//Gameplay
+	std::unique_ptr<Player> player;
+	std::vector<std::unique_ptr<Enemy>> enemies;
+	std::unique_ptr<TileMap> tileMap;
+	
+	//Initialization
 	void initView();
 	void initWindow();
-	void initPlayer();
-	void initTile();
+	void initEntities();
+	
+	//
+	void pollEvents();
+	void updateEntities(float deltaTime);
+	void updatePhysicsColliders();
+	void updateCombatColliders();
+	void updateView();
+
+	void renderEntities();
+	void renderTileMap();
 public:
 	GameEngine();
 	virtual ~GameEngine();
 
+	void run();
 	//functions
-	void updateView();
-	void updateCollisions();
-	void updatePlayer(float deltaTime);
-	void renderPlayer();
+	
 	void update();
 	void render();
 	const sf::RenderWindow& getWindow() const;
