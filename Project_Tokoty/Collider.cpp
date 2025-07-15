@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "Collider.h"
 
 Collider::Collider(sf::FloatRect hitbox, float push, ColliderType type) 
@@ -93,8 +93,42 @@ bool Collider::isActive() const
 bool Collider::intersects(Collider& other) const
 {
 	if (!c_isActive || !other.isActive()) return false;
+	sf::Vector2f otherPositon = other.getPosition();
+	sf::Vector2f otherHalfSize = other.getSize() / 2.0f;
+	sf::Vector2f thisPositon = getPosition();
+	sf::Vector2f thisHalfSize = getSize() / 2.0f;
+
+	float deltaX = (otherPositon.x + otherHalfSize.x) - (thisPositon.x + thisHalfSize.x);
+	float deltaY = (otherPositon.y + otherHalfSize.y) - (thisPositon.y + thisHalfSize.y);
+
+	float intersectX = std::abs(deltaX) - (otherHalfSize.x + thisHalfSize.x);
+	float intersectY = std::abs(deltaY) - (otherHalfSize.y + thisHalfSize.y);
+	return (intersectX <= 0 && intersectY <= 0);
+
+	/*
+	if (!c_isActive || !other.isActive()) return false;
 	// findIntersection returneaza un std::optional<sf::FloatRect> care este empty daca nu exista intersectie
 	return this->hitbox.findIntersection(other.getGlobalBounds()).has_value();
+	*/
+}
+
+bool Collider::intersectGround(Collider& other) const
+{
+	if (!c_isActive || !other.isActive()) return false;
+	sf::Vector2f otherPositon = other.getPosition();
+	sf::Vector2f otherHalfSize = other.getSize() / 2.0f;
+	sf::Vector2f thisPositon = getPosition();
+	sf::Vector2f thisHalfSize = getSize() / 2.0f;
+
+	float deltaX = (otherPositon.x + otherHalfSize.x) - (thisPositon.x + thisHalfSize.x);
+	float deltaY = (otherPositon.y + otherHalfSize.y) - (thisPositon.y + thisHalfSize.y);
+
+	float intersectX = std::abs(deltaX) - (otherHalfSize.x + thisHalfSize.x);
+	float intersectY = std::abs(deltaY) - (otherHalfSize.y + thisHalfSize.y);
+
+	//std::cout << "thisPosition.x: " << thisPositon.x << ", otherPosition.x: " << otherPositon.x << std::endl;
+	//std::cout << "thisPosition.y: " << thisPositon.y << ", otherPosition.y: " << otherPositon.y << std::endl;
+	return (intersectX <= 0 && (thisPositon.y + 2 * thisHalfSize.y  <= otherPositon.y ) );
 }
 
 
@@ -124,7 +158,7 @@ void Collider::renderCollider(sf::RenderTarget& target)
 	target.draw(hitboxShape);
 }
 
-bool Collider::checkCollision(Collider& other, float push)
+bool Collider::checkCollision(Collider& other, float push, bool t)
 {
 	if (!c_isActive || !other.isActive()) return false;
 	sf::Vector2f otherPosisiton = other.getPosition();
@@ -138,38 +172,26 @@ bool Collider::checkCollision(Collider& other, float push)
 	float intersectX = std::abs(deltaX) - (otherHalfSize.x + thisHalfSize.x);
 	float intersectY = std::abs(deltaY) - (otherHalfSize.y + thisHalfSize.y);
 
-	if (intersectX < 0 && intersectY < 0)
+	if (intersectX > 0 || intersectY > 0)
+	{
+		return false;
+	}
+	else
 	{
 		push = std::clamp(push, 0.0f, 1.0f);
 
 		if (intersectX > intersectY)
 		{
-			if (deltaX > 0)
-			{
-				move(intersectX * (1.0f - push), 0.0f);
-				other.move(-intersectX * push, 0.0f);
-			}
-			else
-			{
-				move(-intersectX * (1.0f - push), 0.0f);
-				other.move(intersectX * push, 0.0f);
-			}
+			float dx = (deltaX > 0.f) ? intersectX : -intersectX;
+			move(dx * (1.f - push), 0.f);
+			other.move(-dx * push, 0.f);
 		}
 		else
 		{
-			if (deltaY > 0)
-			{
-				move(0.0f, intersectY * (1.0f - push));
-				other.move(0.0f, -intersectY * push);
-			}
-			else
-			{
-				move(0.0f, -intersectY * (1.0f - push));
-				other.move(0.0f, intersectY * push);
-			}
+			float dy = (deltaY > 0.f) ? intersectY : -intersectY;
+			move(0.f, dy * (1.f - push));
+			other.move(0.f, -dy * push);
 		}
 		return true;
 	}
-
-	return false;
 }

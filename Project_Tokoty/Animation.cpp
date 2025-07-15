@@ -18,6 +18,7 @@ Animation::Animation(int frameCount, sf::IntRect frameSize, float frameTime, boo
 		//std::cout << "Playing animation frame: " << frameRect.position.x << "  "<< frameRect.position.y << std::endl;
 		frames.push_back(frameRect);
 	}
+	/*
 	for (size_t i = 0; i < frames.size(); ++i) {
 		std::cout << "Frame " << i << ": "
 			<< "left=" << frames[i].position.x << ", "
@@ -25,6 +26,7 @@ Animation::Animation(int frameCount, sf::IntRect frameSize, float frameTime, boo
 			<< "width=" << frames[i].size.x << ", "
 			<< "height=" << frames[i].size.x << std::endl;
 	}
+	*/
 }
 
 Animation::Animation()
@@ -66,6 +68,12 @@ void Animation::playAnimation(sf::Sprite& sprite, sf::Time deltaTime, bool mirro
 			}
 		}
 	}
+}
+
+void Animation::resetAnimation()
+{
+	currentTime = frameTime;
+	currentFrameIndex = 0;
 }
 
 

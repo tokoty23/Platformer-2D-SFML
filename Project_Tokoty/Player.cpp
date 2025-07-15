@@ -1,41 +1,8 @@
 #include "stdafx.h"
 #include "Player.h"
 
-
-void Player::initUserInput()
-{
-	userInput = std::make_unique<UserInput>();
-}
-
-void Player::initAnmation()
-{
-	if (animatedSprite)
-	{
-		animatedSprite->addAnimation("IDLE",	   5,  sf::IntRect({ 0, 0 }, { 48, 48 }), 0.1f);
-		animatedSprite->addAnimation("MOVE_LEFT",  16, sf::IntRect({ 0, 144 }, { 48, 48 }), 0.05f);
-		animatedSprite->addAnimation("MOVE_RIGHT", 16, sf::IntRect({ 0, 96 }, { 48, 48 }), 0.1f);
-		animatedSprite->addAnimation("MOVE_UP",	   7,  sf::IntRect({ 0, 48 }, { 48, 48 }), 0.1f);
-		animatedSprite->addAnimation("MOVE_DOWN",  7,  sf::IntRect({ 0, 48 }, { 48, 48 }), 0.1f);
-		animatedSprite->addAnimation("ATTACK",     7,  sf::IntRect({ 0, 48 }, { 48, 48 }), 0.1f);
-	}
-}
-
-void Player::initPhysics()
-{
-	speed = 400.0f;
-	velocity = sf::Vector2f(0.0f, 0.0f);
-	maxVelocity = 300.0f;
-	minVelocity = 1.0f;
-	acceleration = 1000.0f;
-	friction = 0.90f;
-	gravity = 1200.0f;
-	maxGravity = 3000.0f;
-}
-
-
-
 Player::Player(std::unique_ptr<Collider> hitbox, std::unique_ptr<AnimatedSprite> sprite)
-	: Entity(std::move(hitbox), std::move(sprite)), state(PlayerState::P_IDLE)
+	: Entity(std::move(hitbox), std::move(sprite))
 {
 
 	Collider* collider = getCollider(ColliderKeys::E_HITBOX);
@@ -52,22 +19,60 @@ Player::Player(std::unique_ptr<Collider> hitbox, std::unique_ptr<AnimatedSprite>
 	auto attackbox = std::make_unique<Collider>(hitboxRect, 0.f, ColliderType::C_ATTACKBOX);
 	//attackbox->setActive(true); 
 	addCollider(std::move(attackbox), ColliderKeys::E_ATTACKBOX_DEFAULT);
-	
+
 	initUserInput();
 	initPhysics();
 	initAnmation();
+	initCombatStats();
 
 }
 
+void Player::initUserInput()
+{
+	userInput = std::make_unique<UserInput>();
+}
+
+void Player::initAnmation()
+{
+	if (animatedSprite)
+	{
+		animatedSprite->addAnimation("IDLE",	   5,  sf::IntRect({ 0, 0 }, { 48, 48 }), 0.3f);
+		animatedSprite->addAnimation("MOVING", 16, sf::IntRect({ 0, 96 }, { 48, 48 }), 0.1f);
+		animatedSprite->addAnimation("MOVE_UP",	   7,  sf::IntRect({ 0, 48 }, { 48, 48 }), 0.1f);
+		animatedSprite->addAnimation("MOVE_DOWN",  7,  sf::IntRect({ 0, 48 }, { 48, 48 }), 0.1f);
+		animatedSprite->addAnimation("ATTACK",     7,  sf::IntRect({ 0, 48 }, { 48, 48 }), 0.1f);
+		animatedSprite->addAnimation("DYING", 11, sf::IntRect({ 0, 144 }, { 48, 48 }), 0.02f);
+	}
+}
+
+void Player::initPhysics()
+{
+	speed = 400.0f;
+	velocity = sf::Vector2f(0.0f, 0.0f);
+	maxVelocity = 300.0f;
+	minVelocity = 1.0f;
+	acceleration = 1000.0f;
+	friction = 0.90f;
+	gravity = 1200.0f;
+	maxGravity = 3000.0f;
+}
+
+void Player::initCombatStats()
+{
+	Entity::initCombatStats();
+	attackDamage = 100.0f;
+}
+
+
+
 void Player::attack()
 {
-	std::cout << attackCooldownTimer.isActive() << std::endl;
+	if (isDead) return;
 	if (attackCooldownTimer.isActive()) return;
 	
-
 	attackCooldownTimer.start();
 	attackDurationTimer.start();
-	state = PlayerState::P_ATTACKING;
+	state = EntityState::E_ATTACKING;
 
 	Collider* attackbox = getCollider(ColliderKeys::E_ATTACKBOX_DEFAULT);
 	Collider* hitbox = getCollider(ColliderKeys::E_HITBOX);
@@ -87,15 +92,25 @@ void Player::attack()
 	attackbox->setActive(true);
 }
 
+void Player::takeDamage(float damage)
+{
+	if (isDead) return;
+	Entity::takeDamage(damage);
+	invincibilityTimer.start();
+	Collider* hurtbox = getCollider(ColliderKeys::E_HURTBOX);
+	hurtbox->setActive(false);
+}
+
 // functia modifica doar viteza in functie de input, nu si pozitia
 void Player::updateMovement(sf::Time deltaTime)
 {
+	if (isDead) return;
 
 	std::vector<UserInputData>userInputData = userInput->getUserInput();
 	
 	if (userInputData.empty())
 	{
-		if (!attackDurationTimer.isActive()) state = PlayerState::P_IDLE;
+		if (!attackDurationTimer.isActive()) state = EntityState::E_IDLE;
 		return;
 	}
 	bool movementInputReceived = false;
@@ -106,22 +121,33 @@ void Player::updateMovement(sf::Time deltaTime)
 		{
 		case UserInputData::U_MOVE_LEFT:
 			move(-speed, 0.0f, deltaTime);
-			facingRight = false; 
 			movementInputReceived = true;
-			if (!attackDurationTimer.isActive()) state = PlayerState::P_MOVING;
+			if (!attackDurationTimer.isActive())
+			{
+				facingRight = false;
+				state = EntityState::E_MOVING;
+			}
 
 			break;
 
 		case UserInputData::U_MOVE_RIGHT:
 			move(speed, 0.0f, deltaTime);
-			facingRight = true;
 			movementInputReceived = true;
-			if (!attackDurationTimer.isActive()) state = PlayerState::P_MOVING;
+			if (!attackDurationTimer.isActive())
+			{
+				facingRight = true;
+				state = EntityState::E_MOVING;
+			}
 
 			break;
 
 		case UserInputData::U_MOVE_UP:
-			velocity.y = -600.0f;
+			velocity.y = -500.0f;
+			if(isGrounded)
+			{
+				velocity.y = -800;
+				isGrounded = false;
+			}
 
 			break;
 
@@ -133,7 +159,7 @@ void Player::updateMovement(sf::Time deltaTime)
 
 		case UserInputData::U_ATTACK_DEFAULT:
 			attack();
-			//if (attackDurationTimer.isActive()) state = PlayerState::P_ATTACKING;
+			//if (attackDurationTimer.isActive()) state = EntityState::E_ATTACKING;
 
 			break;
 
@@ -142,53 +168,54 @@ void Player::updateMovement(sf::Time deltaTime)
 			break;
 		}
 	}
-	if (state != PlayerState::P_ATTACKING)
+	if (state != EntityState::E_ATTACKING)
 	{
 		if (movementInputReceived)
 		{
-			state = PlayerState::P_MOVING;
+			state = EntityState::E_MOVING;
 		}
 		else
 		{
-			state = PlayerState::P_IDLE;
+			state = EntityState::E_IDLE;
 		}
 	}
 }
 
 void Player::updateAnimation(sf::Time deltaTime)
 {
-	switch (state)
+	Entity::updateAnimation(deltaTime);
+}
+
+void Player::updateTimers(sf::Time deltaTime)
+{
+	Entity::updateTimers(deltaTime);
+	if (isDead) return;
+	if (!invincibilityTimer.isActive())
 	{
-		case PlayerState::P_IDLE:
-			animatedSprite->playAnimation("IDLE", deltaTime);
-			break;
-		case PlayerState::P_MOVING:
-			if (facingRight)
-				animatedSprite->playAnimation("MOVE_RIGHT", deltaTime);
-			else
-				animatedSprite->playAnimation("MOVE_LEFT", deltaTime);
-			break;
-		case PlayerState::P_ATTACKING:
-			if (facingRight)
-				animatedSprite->playAnimation("ATTACK", deltaTime);
-			else
-				animatedSprite->playAnimation("ATTACK", deltaTime, true);
-			break;
-			
-			break;
-		default:
-			animatedSprite->playAnimation("IDLE", deltaTime);
-			break;
+		Collider* hurtBox = getCollider(ColliderKeys::E_HURTBOX);
+		if (hurtBox)
+		{
+			hurtBox->setActive(true);
+		}
+	}
+	else
+	{
+		Collider* hurtBox = getCollider(ColliderKeys::E_HURTBOX);
+		if (hurtBox)
+		{
+			hurtBox->setActive(false);
+		}
 	}
 }
 
 void Player::update(sf::Time deltaTime)
 {
-	if (state == PlayerState::P_ATTACKING)
+	if (state == EntityState::E_DEAD) return;
+	if (state == EntityState::E_ATTACKING)
 	{
 		if (!attackDurationTimer.isActive())
 		{
-			state = PlayerState::P_IDLE;
+			state = EntityState::E_IDLE;
 		}
 	}
 
@@ -197,3 +224,18 @@ void Player::update(sf::Time deltaTime)
 
 	Entity::update(deltaTime);
 }
+
+void Player::render(sf::RenderTarget& target)
+{
+	if (state == EntityState::E_DEAD) return;
+	if (invincibilityTimer.isActive() && (int)(invincibilityTimer.getRemainingTime().asMilliseconds()) % 200 < 100)
+	{
+		return; // Skip rendering every other 100ms for a blinking effect
+	}
+	Entity::render(target);
+	//std::cout << "Player velocity.y: " << velocity.y << std::endl;
+	//std::cout << "Player grounded" << isGrounded << std::endl;
+	//Collider* collider = getCollider(ColliderKeys::E_HITBOX);
+	//std::cout << "Entity rendered at position: " << collider->getPosition().x << ", " << collider->getPosition().y << std::endl;
+}
+

@@ -11,6 +11,17 @@ enum class ColliderKeys
 	E_ATTACKBOX_DEFAULT_INITIAL, // folosit pentru offset-ul initial inainte de .attack() care ar putea modifica offsetu-l in functie de atac
 };
 
+enum EntityState
+{
+	E_IDLE,
+	E_MOVING,
+	E_JUMPING,
+	E_FALLING,
+	E_ATTACKING,
+	E_DYING,
+	E_DEAD
+};
+
 class Entity
 {
 protected:
@@ -34,14 +45,19 @@ protected:
 
 	bool isGrounded;
 	bool facingRight;
+	bool isDead;
 
 	//Combat Stats
 	int maxHealth;
 	int health;
 	float attackDamage;
+	//Timers
 	Timer attackCooldownTimer;
 	Timer attackDurationTimer;
 	Timer invincibilityTimer;
+	Timer deathTimer;
+
+	EntityState state;
 
 	void updatePhysics(sf::Time deltaTime);
 	virtual void updateAnimation(sf::Time deltaTime);
@@ -61,6 +77,7 @@ public:
 	std::vector<Collider*> getColliders() const;
 
 	void setScale(sf::Vector2f scale);
+	virtual void setIsGrounded(bool grounded);
 
 	//Accessors
 	const sf::Vector2f getPosition() const;
@@ -69,6 +86,8 @@ public:
 	//Modifiers
 	virtual void syncCollidersWithHitbox();
 	void setPosition(const float x, const float y);
+	void setHealth(int health);
+	void setMaxHealth(int maxHealth);
 	void resetVelocityY();
 	virtual void update(sf::Time deltaTime);
 	virtual void render(sf::RenderTarget& target);
@@ -76,6 +95,15 @@ public:
 
 	//Combat 
 	virtual void attack();
-	void takeDamage(float damage);
+	virtual void takeDamage(float damage);
+	virtual void die();
 	float getAttackDamage() const;
+	virtual float getHealth() const;
+	virtual float getMaxHealth() const;
+	EntityState getState() const;
+	bool isDefeated();
+	void setState(EntityState state);
+	void respawn(sf::Vector2f);
+
+
 };

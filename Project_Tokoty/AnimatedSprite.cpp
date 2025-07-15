@@ -1,32 +1,41 @@
 #include "stdafx.h"
 #include "AnimatedSprite.h"
 
-AnimatedSprite::AnimatedSprite(std::string textureName, sf::IntRect currentRect, sf::Vector2f position)
-	: StaticSprite(textureName, currentRect, position)
+AnimatedSprite::AnimatedSprite(sf::Texture& texture, sf::IntRect currentRect)
+	: StaticSprite(texture, currentRect)
 {
-	currentTime = 0.0f;
 }
 
 
 void AnimatedSprite::addAnimation(std::string name, int frameCount, sf::IntRect frameSize, float frameTime, bool looping)
 {
 	animations.emplace(name, Animation(frameCount, frameSize, frameTime, looping));
+	currentAnimationName = name;
 }
 
+// mirrored = true animatia fi redata invers pe axa X
 void AnimatedSprite::playAnimation(std::string name, sf::Time deltaTime, bool mirrored)
+{		
+        animations[name].playAnimation(sprite, deltaTime, mirrored); // sprite ul este std::optional trebuie apelat .value()
+}
+
+void AnimatedSprite::changeAnimation(std::string name)
 {
-    if (sprite)
-    {
-		
-        animations[name].playAnimation(sprite.value(), deltaTime, mirrored); // sprite ul este std::optional trebuie apelat .value()
-    }
+	currentAnimationName = name;
+	animations[name].resetAnimation();
+}
+
+void AnimatedSprite::update(sf::Time deltaTime)
+{
+	animations[currentAnimationName].playAnimation(sprite, deltaTime, false);
 }
 
 void AnimatedSprite::render(sf::RenderTarget& target)
 {
-	if (sprite.has_value())
-	{
-		//std::cout << currentRect.position.x << " " << currentRect.position.y << " + "<< textureName  << std::endl;
-		target.draw(*sprite);
-	}
+    target.draw(sprite);
+}
+
+void AnimatedSprite::render(sf::RenderTarget& target) const
+{
+	target.draw(sprite);
 }

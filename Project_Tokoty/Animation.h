@@ -15,9 +15,6 @@ public:
 	Animation();
 	~Animation() = default;
 	void playAnimation(sf::Sprite& sprite, sf::Time deltaTime, bool mirrored = false);
-	bool isLooping();
-	float getFrameTime();
-	float getLooping();
-
+	void resetAnimation();
 };
 

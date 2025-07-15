@@ -1,54 +1,44 @@
 #include "stdafx.h"
 #include "Tile.h"
 
-Tile::Tile(std::string textureName, sf::IntRect sizeHitbox, sf::IntRect sizeSprite, sf::Vector2f position, bool damaging, bool moveable)
-	: damaging(damaging), moveable(moveable)
+
+Tile::Tile(sf::Texture& texture, sf::IntRect sizeHitbox, sf::IntRect sizeSprite, sf::Vector2f position, bool damaging, bool moveable)
+	: sprite(texture, sizeHitbox), damaging(damaging), moveable(moveable)
 {
+	sprite.setTextureRect(sizeSprite);
+	sprite.setPosition(position);
 
-	initSprite(textureName, sizeHitbox, sizeSprite, position);
-}
-
-Tile::Tile(sf::Texture* texture, sf::IntRect sizeHitbox, sf::IntRect sizeSprite, sf::Vector2f position, bool damaging, bool moveable)
-	: damaging(damaging), moveable(moveable)
-{
-
-	initSprite(texture, sizeHitbox, sizeSprite, position);
-}
-
-
-void Tile::initSprite(std::string textureName, sf::IntRect sizeHitbox, sf::IntRect sizeSprite, sf::Vector2f position)
-{
-	sprite = std::make_unique<StaticSprite>(textureName, sizeSprite, position);
 	hitboxTile = std::make_unique<Collider>
-		( sf::FloatRect( { position }, { float(sizeHitbox.size.x), float(sizeHitbox.size.y) } ), 0.0f); //PROBLEMA are treaba cumva ca am schibmat din sprite->getGlobal
+		(sprite.getGlobalBounds(), 0.0f); //PROBLEMA are treaba cumva ca am schibmat din sprite->getGlobal
 	// in constructorul lui collider parametrul dat la hitbox este salvat deci chiar daca setezi positia, isi va da update la valoarea din size	
+
 }
 
-void Tile::initSprite(sf::Texture* texture, sf::IntRect sizeHitbox, sf::IntRect sizeSprite, sf::Vector2f position)
-{
-	sprite = std::make_unique<StaticSprite>(texture, sizeSprite, position);
-	hitboxTile = std::make_unique<Collider>
-		(sf::FloatRect({ position }, { float(sizeHitbox.size.x), float(sizeHitbox.size.y) }), 0.0f);
-}
 
 const sf::FloatRect Tile::getGlobalBounds() const
 {
-	return sprite->getGlobalBounds();
+	return sprite.getGlobalBounds();
+}
+
+Collider* Tile::getCollider() const
+{
+	return hitboxTile.get();
+}
+
+void Tile::setScale(sf::Vector2f scale)
+{
+	sprite.setScale(scale);
+	hitboxTile->setScale(scale);
 }
 
 void Tile::update()
-{// Update the hitbox position to match the sprite position
-	//hitboxTile = std::make_unique<Collider>(sprite->getGlobalBounds(), 0.0f); // collider size is the same as sprite size
-	//hitboxTile->move(sprite->getPosition().x, sprite->getPosition().y);
-
+{
+	if (moveable) sprite.setPosition(hitboxTile->getPosition());
 }
 
-void Tile::render(sf::RenderTarget& target)
+void Tile::render(sf::RenderTarget& target) const
 {
-	if (sprite)
-	{
-		if(moveable) sprite->setPosition(hitboxTile->getPosition());
-		sprite->StaticSprite::render(target);
-	}
-	hitboxTile->renderCollider(target);
+	
+	sprite.StaticSprite::render(target);
+	//hitboxTile->renderCollider(target);
 }

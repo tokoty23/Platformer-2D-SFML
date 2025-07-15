@@ -33,14 +33,16 @@ void Entity::initCombatStats()
 {
 	maxHealth = 100.0f;
 	health = maxHealth;
-	attackDamage = 10.0f;
+	attackDamage = 20.0f;
 
 	facingRight = true;
+	state = EntityState::E_IDLE;
+	isDead = false;
 
 	attackCooldownTimer.setDuration(sf::seconds(2.0f)); //timp de asteptare intre atacuri
 	attackDurationTimer.setDuration(sf::seconds(0.7f)); //cat timp este activ attackbox-ul
 	invincibilityTimer.setDuration(sf::seconds(1.0f)); //cat timp este inactiv hurtbox-ul dupa ce entity a fost atacat
-
+	deathTimer.setDuration(sf::seconds(2.0f)); //cat timp entity este in starea EntityState::DYING inainte sa dispara
 }
 
 void Entity::calculateSpriteOffset(bool centered)
@@ -65,6 +67,7 @@ void Entity::updateTimers(sf::Time deltaTime)
 	attackCooldownTimer.update(deltaTime);
 	attackDurationTimer.update(deltaTime);
 	invincibilityTimer.update(deltaTime);
+	deathTimer.update(deltaTime);
 	
 	if (!attackDurationTimer.isActive())
 	{
@@ -75,21 +78,9 @@ void Entity::updateTimers(sf::Time deltaTime)
 		}
 	}
 
-	if (!invincibilityTimer.isActive())
+	if (state == EntityState::E_DYING && !deathTimer.isActive())
 	{
-		Collider* hurtBox = getCollider(ColliderKeys::E_HURTBOX);
-		if (hurtBox)
-		{
-			hurtBox->setActive(true);
-		}
-	}
-	else
-	{
-		Collider* hurtBox = getCollider(ColliderKeys::E_HURTBOX);
-		if (hurtBox)
-		{
-			hurtBox->setActive(false);
-		}
+		setState(EntityState::E_DEAD);
 	}
 }
 
@@ -117,20 +108,62 @@ void Entity::syncCollidersWithHitbox()
 
 void Entity::updatePhysics(sf::Time deltaTime)
 {
+	if (isDead) return;
 	//Gravity
+	if (!isGrounded)
+	{
+		velocity.y += 1.0f * gravity * deltaTime.asSeconds();
+		if (std::abs(velocity.y) > maxGravity) velocity.y = maxGravity * ((velocity.y < 0) ? -1.0f : 1.0f);
+	}
+	
 	velocity.y += 1.0f * gravity * deltaTime.asSeconds();
 	if (std::abs(velocity.y) > maxGravity) velocity.y = maxGravity * ((velocity.y < 0) ? -1.0f : 1.0f);
-	velocity *= friction;
+	velocity.x *= friction;
 
-	if (std::abs(velocity.x) < minVelocity) velocity.x = 0.0f;
-	if (std::abs(velocity.y) < minVelocity) velocity.y = 0.0f;
+	if (std::abs(velocity.x) < minVelocity * deltaTime.asSeconds()) velocity.x = 0.0f;
+	if (std::abs(velocity.y) < minVelocity * deltaTime.asSeconds()) velocity.y = 0.0f;
 
 	Collider* collider = getCollider(ColliderKeys::E_HITBOX);
 	if (collider) collider->move(velocity, deltaTime);
+
+	/*
+	if (!isGrounded)
+	{
+		if (velocity.y < 0) setState(EntityState::JUMPING);
+		else if (velocity.y > 0) setState(EntityState::FALLING);
+	}
+	*/
 }
 
 void Entity::updateAnimation(sf::Time deltaTime)
 {
+	if (!animatedSprite) return;
+	switch (state)
+	{
+	case EntityState::E_IDLE:
+		if (facingRight)
+			animatedSprite->playAnimation("IDLE", deltaTime);
+		else
+			animatedSprite->playAnimation("IDLE", deltaTime, true);
+
+		break;
+	case EntityState::E_MOVING:
+			animatedSprite->playAnimation("MOVING", deltaTime, !facingRight);
+		break;
+	case EntityState::E_ATTACKING:
+		if (facingRight)
+			animatedSprite->playAnimation("ATTACK", deltaTime);
+		else
+			animatedSprite->playAnimation("ATTACK", deltaTime, true);
+		break;
+
+	case EntityState::E_DYING:
+		animatedSprite->playAnimation("DYING", deltaTime, !facingRight);
+		break;
+	default:
+		animatedSprite->playAnimation("IDLE", deltaTime);
+		break;
+	}
 }
 
 void Entity::move(const float x, const float y, sf::Time deltaTime)
@@ -156,7 +189,11 @@ void Entity::addCollider(std::unique_ptr<Collider> collider, ColliderKeys key)
 				
 				sf::Vector2f offset = collider->getPosition() - hitbox->getPosition();
 				collidersOffset[key] = offset;
-				if(key == ColliderKeys::E_ATTACKBOX_DEFAULT) collidersOffset[ColliderKeys::E_ATTACKBOX_DEFAULT_INITIAL] = offset;
+				if (key == ColliderKeys::E_ATTACKBOX_DEFAULT)
+				{
+					std::cout << "Attackbox active at spawn: " << collider->isActive() << std::endl;
+					collidersOffset[ColliderKeys::E_ATTACKBOX_DEFAULT_INITIAL] = offset;
+				}
 				std::cout << "collider added pos" << collider->getPosition().x << " " << collider->getPosition().y << std::endl;
 				std::cout << "hitbox added pos" << hitbox->getPosition().x << " " << hitbox->getPosition().y << std::endl;
 				std::cout << "offset" << offset.x << " " << offset.y<< std::endl;
@@ -215,6 +252,11 @@ void Entity::setScale(sf::Vector2f scale)
 	this->spriteOffset.y *= scale.y;
 }
 
+void Entity::setIsGrounded(bool grounded)
+{
+	isGrounded = grounded;
+}
+
 
 const sf::Vector2f Entity::getPosition() const
 {
@@ -235,12 +277,30 @@ const sf::FloatRect Entity::getGlobalBounds() const
 
 void Entity::setPosition(const float x, const float y)
 {
+	std::cout << "Entity set position: " << x << ",  " << y << std::endl;
+	std::cout << "Entity set position: " << x << ",  " << y << std::endl;
+	std::cout << "Entity set position: " << x << ",  " << y << std::endl;
+	std::cout << "Entity set position: " << x << ",  " << y << std::endl;
+	std::cout << "Entity set position: " << x << ",  " << y << std::endl;
+	std::cout << "Entity set position: " << x << ",  " << y << std::endl;
+	std::cout << "Entity set position: " << x << ",  " << y << std::endl;
+	std::cout << "Entity set position: " << x << ",  " << y << std::endl;
 	Collider* collider = getCollider(ColliderKeys::E_HITBOX);
 	if (collider)
 	{
 		collider->setPosition(x, y);
 		syncCollidersWithHitbox();
 	}
+}
+
+void Entity::setHealth(int health)
+{
+	this->health = health;
+}
+
+void Entity::setMaxHealth(int maxHealth)
+{
+	this->maxHealth = maxHealth;
 }
 
 
@@ -252,6 +312,7 @@ void Entity::resetVelocityY()
 // \brief updateaza fizica entitatii
 void Entity::update(sf::Time deltaTime)
 {
+	if (state == EntityState::E_DEAD) return;
 	updatePhysics(deltaTime);
 	updateTimers(deltaTime);
 	updateAnimation(deltaTime);
@@ -261,6 +322,7 @@ void Entity::update(sf::Time deltaTime)
 // \brief randeaza entitatea
 void Entity::render(sf::RenderTarget& target)
 {
+	if (state == EntityState::E_DEAD) return;
 	Collider* collider = getCollider(ColliderKeys::E_HITBOX);
 
 		if (animatedSprite && collider)
@@ -271,19 +333,42 @@ void Entity::render(sf::RenderTarget& target)
 			{
 				pair.second->renderCollider(target);
 			}
+			
 		}
 
 }
 
 void Entity::attack()
 {
+	//if (isDead) return;
+	Collider* attackBox = getCollider(ColliderKeys::E_ATTACKBOX_DEFAULT);
+	attackBox->setActive(true);
+	attackDurationTimer.start();
 }
 
 void Entity::takeDamage(float damage)
 {
+	//if (isDead) return;
 	health -= damage;
-	if (health <= 0.0f) health = 0.0f;
+	if (health <= 0.0f)
+	{
+		health = 0.0f;
+		die();
+	}
 	std::cout << "Entity took damage: " << damage << ", current health: " << health << std::endl;
+}
+
+void Entity::die()
+{
+	if (isDead) return;
+	isDead = true;
+	state = EntityState::E_DYING;
+	velocity = sf::Vector2f(0.0f, 0.0f);
+	for (const auto& collider : colliders)
+	{
+		collider.second->setActive(false);
+	}
+	deathTimer.start();
 }
 
 float Entity::getAttackDamage() const
@@ -293,4 +378,45 @@ float Entity::getAttackDamage() const
 		return attackDamage;
 	}
 	return 0.0f;
+}
+
+float Entity::getHealth() const
+{
+	return health;
+}
+
+float Entity::getMaxHealth() const
+{
+	return maxHealth;
+}
+
+EntityState Entity::getState() const
+{
+	return state;
+}
+
+bool Entity::isDefeated()
+{
+	return isDead;
+}
+
+void Entity::setState(EntityState state)
+{
+	this->state = state;
+}
+
+void Entity::respawn(sf::Vector2f pos)
+{
+	setPosition(pos.x, pos.y);
+	setState(EntityState::E_IDLE);
+	isDead = false;
+	health = maxHealth;
+	velocity = sf::Vector2f(0, 0);
+	deathTimer.stop();
+	for (auto& collider : colliders)
+	{
+		collider.second->setActive(true);
+	}
+	syncCollidersWithHitbox();
+	//colliders[ColliderType::C_HITBOX]
 }

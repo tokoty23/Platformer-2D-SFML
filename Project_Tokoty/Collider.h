@@ -43,8 +43,9 @@ public:
 	
 	bool isActive() const;
 	bool intersects(Collider& other) const;
+	bool intersectGround(Collider&  other) const;
 	void renderCollider(sf::RenderTarget& target);
-	bool checkCollision(Collider& other, float push);	
+	bool checkCollision(Collider& other, float push, bool t = false);	
 
 };
 

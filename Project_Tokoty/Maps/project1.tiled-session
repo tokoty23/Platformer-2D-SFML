@@ -1,0 +1,59 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "level1.tmx",
+    "expandedProjectPaths": [
+    ],
+    "fileStates": {
+        "Grass_sheet_v1.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "grass1test.tmx": {
+            "scale": 0.75,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 652.6666666666666,
+                "y": 303.33333333333326
+            }
+        },
+        "grassenemy1test.tmx": {
+            "scale": 0.75,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 362,
+                "y": 438
+            }
+        },
+        "level1.tmx": {
+            "scale": 0.75,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 624.6666666666666,
+                "y": 626
+            }
+        }
+    },
+    "last.imagePath": "D:/Licenta/Project_Tokoty/Project_Tokoty/Textures",
+    "map.lastUsedFormat": "tmx",
+    "map.tileHeight": 48,
+    "map.tileWidth": 48,
+    "openFiles": [
+        "grass1test.tmx",
+        "level1.tmx"
+    ],
+    "project": "project1.tiled-project",
+    "recentFiles": [
+        "grass1test.tmx",
+        "level1.tmx",
+        "grassenemy1test.tmx",
+        "Grass_sheet_v1.tsx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 48,
+        "width": 48
+    }
+}

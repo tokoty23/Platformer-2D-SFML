@@ -15,13 +15,13 @@ class Enemy : public Entity
 protected:
 
 	//Enemy state
-	EnemyState state;
+
 	sf::Vector2f startPosition;
 	float movingRange;
 
 
 	//Initialization functions
-	void initAnmation();
+	virtual void initAnmation();
 	void initPhysics() override;
 	void virtual initBehaviour();
 	virtual void updateEnemyBehaviour(sf::Time deltaTime);
@@ -30,7 +30,7 @@ public:
 	virtual ~Enemy() override = default;
 
 	void update(sf::Time deltaTime) override;
-	
+	void updateAnimation(sf::Time deltaTime) override;
 
 };
 

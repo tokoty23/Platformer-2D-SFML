@@ -45,6 +45,11 @@ void Timer::update(sf::Time deltaTime)
 	}
 }
 
+sf::Time Timer::getRemainingTime() const
+{
+	return remainingTime;
+}
+
 bool Timer::isActive() const
 {
 	return active;

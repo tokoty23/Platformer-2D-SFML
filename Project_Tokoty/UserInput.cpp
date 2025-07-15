@@ -5,6 +5,7 @@ UserInput::UserInput()
 {
 	changeKeybind(UserInputData::U_MOVE_LEFT, sf::Keyboard::Key::A);
 	changeKeybind(UserInputData::U_MOVE_RIGHT, sf::Keyboard::Key::D);
+	//changeKeybind(UserInputData::U_MOVE_UP, sf::Keyboard::Key::Space);
 	changeKeybind(UserInputData::U_MOVE_UP, sf::Keyboard::Key::W);
 	changeKeybind(UserInputData::U_MOVE_DOWN, sf::Keyboard::Key::S);
 	changeKeybind(UserInputData::U_ATTACK_DEFAULT, sf::Keyboard::Key::K);

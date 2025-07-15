@@ -2,6 +2,7 @@
 #include<cstdlib>
 #include<ctime>
 #include<time.h>
+#include <stack>
 
 //SFML libraries
 #include<SFML/Audio.hpp>
@@ -15,3 +16,5 @@
 #include<tmxlite/TileLayer.hpp>
 #include<tmxlite/Tileset.hpp>
 	
+//SQLITE
+#include "sqlite3.h"

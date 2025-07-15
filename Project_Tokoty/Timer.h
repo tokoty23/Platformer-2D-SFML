@@ -17,6 +17,7 @@ public:
 	void pause();
 	void resume();
 	void update(sf::Time deltaTime);
+	sf::Time getRemainingTime() const;
 
 	bool isActive() const;
 

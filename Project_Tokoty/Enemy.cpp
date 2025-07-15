@@ -18,13 +18,28 @@ Enemy::Enemy(std::unique_ptr<Collider> hitbox, std::unique_ptr<AnimatedSprite> s
 	addCollider(std::move(hurtbox), ColliderKeys::E_HURTBOX);
 	//hitboxRect.position.x += hitboxRect.size.x;
 	auto attackbox = std::make_unique<Collider>(hitboxRect, 0.f, ColliderType::C_ATTACKBOX);
-	attackbox->setActive(true);
+	//attackbox->setActive(true);
+	std::cout << "Attackbox enemy active at spawn: " << attackbox->isActive() << std::endl;
 	addCollider(std::move(attackbox), ColliderKeys::E_ATTACKBOX_DEFAULT);
+	
 
 	initPhysics();
 	initBehaviour();
+	initAnmation();
 }
 
+void Enemy::initAnmation()
+{
+	if (animatedSprite)
+	{
+		animatedSprite->addAnimation("IDLE", 5, sf::IntRect({ 0, 0 }, { 48, 48 }), 0.3f);
+		animatedSprite->addAnimation("MOVING", 16, sf::IntRect({ 0, 96 }, { 48, 48 }), 0.1f);
+		animatedSprite->addAnimation("MOVE_UP", 7, sf::IntRect({ 0, 48 }, { 48, 48 }), 0.1f);
+		animatedSprite->addAnimation("MOVE_DOWN", 7, sf::IntRect({ 0, 48 }, { 48, 48 }), 0.1f);
+		animatedSprite->addAnimation("ATTACK", 7, sf::IntRect({ 0, 48 }, { 48, 48 }), 0.1f);
+		animatedSprite->addAnimation("DYING", 16, sf::IntRect({ 0, 144 }, { 48, 48 }), 0.02f);
+	}
+}
 void Enemy::initPhysics()
 {
 	speed = 400.0f;
@@ -39,7 +54,8 @@ void Enemy::initPhysics()
 
 void Enemy::initBehaviour()
 {
-	state = EnemyState::MOVING_RIGHT;
+	state = EntityState::E_MOVING;
+	facingRight = false;
 	startPosition = Entity::getPosition();
 	movingRange = 500.0f;
 
@@ -54,35 +70,51 @@ void Enemy::update(sf::Time deltaTime)
 	
 }
 
+void Enemy::updateAnimation(sf::Time deltaTime)
+{
+	Entity::updateAnimation(deltaTime);
+}
+
 void Enemy::updateEnemyBehaviour(sf::Time deltaTime)
 {
+	if (isDead) return;
+	attack();
 	switch (state)
 	{
-		case EnemyState::MOVING_RIGHT:
+		case EntityState::E_IDLE:
+		case EntityState::E_MOVING:
 
-			if (getPosition().x - startPosition.x >= movingRange)
+			if (facingRight == true)
 			{
-				state = EnemyState::MOVING_LEFT;
-				std::cout << "Enemy is moving right" << std::endl;
-				break;
+				if (getPosition().x - startPosition.x >= movingRange)
+				{
+					state = EntityState::E_MOVING;
+					facingRight = false;
+					std::cout << "Enemy is moving right" << std::endl;
+					break;
+				}
+				move(speed, 0.f, deltaTime);
 			}
-			move(speed, 0.f, deltaTime);
+			else if (facingRight == false)
+			{
+				if (getPosition().x - startPosition.x <= -movingRange)
+				{
+					state = EntityState::E_MOVING;
+					facingRight = true;
+					std::cout << "Enemy is moving left" << std::endl;
+					break;
+				}
+				move(-speed, 0.f, deltaTime);
+			}
+			
 		break;
-		case EnemyState::MOVING_LEFT:
+		case EntityState::E_ATTACKING:
 
-			if (getPosition().x - startPosition.x <= -movingRange)
-			{
-				state = EnemyState::MOVING_RIGHT;
-				std::cout << "Enemy is moving left" << std::endl;
-				break;
-			}
-			move(-speed, 0.f, deltaTime);
+			
 			break;
 		default:
-			state = EnemyState::IDLE;
+			state = EntityState::E_IDLE;
 			break;
 				
 	}
-
-	
 }
